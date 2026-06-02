@@ -1,0 +1,91 @@
+/* ═══════════════════════════════════════════════
+   THEME: WhatsApp Dark
+   ═══════════════════════════════════════════════ */
+
+[data-theme="whatsapp"] {
+  /* Fonts */
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-size-base: 0.9375rem;
+
+  /* App backgrounds */
+  --color-bg-app:           #111B21;
+  --color-bg-sidebar:       #111B21;
+  --color-bg-sidebar-header:#202C33;
+  --color-bg-chat:          #0B141A;
+  --color-bg-header:        #202C33;
+  --color-bg-input:         #202C33;
+
+  /* Chat wallpaper */
+  --color-chat-wallpaper:   #0B141A;
+  --chat-wallpaper-image:   url('../assets/wallpaper-wa.png');
+  --chat-wallpaper-size:    420px;
+  --chat-wallpaper-opacity: 0.35;
+
+  /* Bubbles */
+  --color-bg-bubble-out:    #005C4B;
+  --color-bg-bubble-in:     #202C33;
+  --color-text-bubble-out:  #E9EDEF;
+  --color-text-bubble-in:   #E9EDEF;
+  --color-bubble-out-tail:  #005C4B;
+  --color-bubble-in-tail:   #202C33;
+
+  /* Bubble shadow */
+  --bubble-shadow:          0 1px 2px rgba(0,0,0,0.35);
+
+  /* Bubble radius */
+  --bubble-radius-base:     10px;
+  --bubble-radius-out:      10px 10px 2px 10px;
+  --bubble-radius-in:       10px 10px 10px 2px;
+
+  /* Text */
+  --color-text-primary:     #E9EDEF;
+  --color-text-secondary:   #8696A0;
+  --color-text-timestamp:   #8696A0;
+  --color-text-sender:      #53BDEB;
+
+  /* Accent */
+  --color-accent:           #00A884;
+  --color-accent-hover:     #008f70;
+  --color-accent-shadow:    rgba(0, 168, 132, 0.35);
+  --color-accent-subtle:    rgba(0, 168, 132, 0.08);
+
+  /* UI elements */
+  --color-border:           #2A3942;
+  --color-icon:             #8696A0;
+  --color-icon-hover-bg:    rgba(255,255,255,0.07);
+  --color-icon-hover:       #E9EDEF;
+  --color-divider-bg:       rgba(134, 150, 160, 0.12);
+  --color-divider-text:     #8696A0;
+  --color-system-bg:        rgba(11, 20, 26, 0.75);
+  --color-system-text:      #8696A0;
+
+  /* Sidebar */
+  --color-sidebar-item-hover: rgba(255,255,255,0.05);
+  --color-sidebar-item-active: rgba(255,255,255,0.1);
+
+  /* Search */
+  --color-search-bg:        #202C33;
+  --color-search-placeholder: #8696A0;
+  --color-input-bg:         #2A3942;
+
+  /* Modals */
+  --color-modal-bg:         #233138;
+  --color-modal-border:     rgba(255,255,255,0.08);
+
+  /* Scrollbar */
+  --color-scrollbar:        rgba(255,255,255,0.1);
+  --color-scrollbar-hover:  rgba(255,255,255,0.2);
+
+  /* Theme picker */
+  --color-theme-option-bg:       #2A3942;
+  --color-theme-option-border:   #3D5563;
+  --color-theme-option-active-border: #00A884;
+  --color-theme-option-active-bg: rgba(0, 168, 132, 0.12);
+
+  /* Message read tick color */
+  --color-tick-read: #53BDEB;
+  --color-tick-sent: #8696A0;
+
+  /* Link colors in chat */
+  --color-link: #53BDEB;
+}

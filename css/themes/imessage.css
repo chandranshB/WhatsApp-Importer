@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════
+   THEME: iMessage (Apple Messages)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="imessage"] {
+  /* Fonts */
+  --font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --font-size-base: 0.9375rem;
+
+  /* App backgrounds */
+  --color-bg-app:           #F5F5F7;
+  --color-bg-sidebar:       #FFFFFF;
+  --color-bg-sidebar-header:#F5F5F7;
+  --color-bg-chat:          #FFFFFF;
+  --color-bg-header:        rgba(245, 245, 247, 0.92);
+  --color-bg-input:         #FFFFFF;
+
+  /* Chat wallpaper */
+  --color-chat-wallpaper:   #FFFFFF;
+  --chat-wallpaper-image:   none;
+  --chat-wallpaper-size:    auto;
+  --chat-wallpaper-opacity: 0;
+
+  /* Bubbles */
+  --color-bg-bubble-out:    #007AFF;
+  --color-bg-bubble-in:     #E9E9EB;
+  --color-text-bubble-out:  #FFFFFF;
+  --color-text-bubble-in:   #1C1C1E;
+  --color-bubble-out-tail:  #007AFF;
+  --color-bubble-in-tail:   #E9E9EB;
+
+  /* Bubble shadow */
+  --bubble-shadow:          none;
+
+  /* Bubble radius */
+  --bubble-radius-base:     18px;
+  --bubble-radius-out:      18px 18px 4px 18px;
+  --bubble-radius-in:       18px 18px 18px 4px;
+
+  /* Text */
+  --color-text-primary:     #1C1C1E;
+  --color-text-secondary:   #8E8E93;
+  --color-text-timestamp:   #8E8E93;
+  --color-text-sender:      #636366;
+
+  /* Accent */
+  --color-accent:           #007AFF;
+  --color-accent-hover:     #0056CC;
+  --color-accent-shadow:    rgba(0, 122, 255, 0.3);
+  --color-accent-subtle:    rgba(0, 122, 255, 0.08);
+
+  /* UI elements */
+  --color-border:           #E5E5EA;
+  --color-icon:             #8E8E93;
+  --color-icon-hover-bg:    rgba(0,0,0,0.06);
+  --color-icon-hover:       #1C1C1E;
+  --color-divider-bg:       #F2F2F7;
+  --color-divider-text:     #8E8E93;
+  --color-system-bg:        #F2F2F7;
+  --color-system-text:      #8E8E93;
+
+  /* Sidebar */
+  --color-sidebar-item-hover: rgba(0,0,0,0.04);
+  --color-sidebar-item-active: rgba(0,122,255,0.1);
+
+  /* Search */
+  --color-search-bg:        #E5E5EA;
+  --color-search-placeholder: #8E8E93;
+  --color-input-bg:         #F2F2F7;
+
+  /* Modals */
+  --color-modal-bg:         #FFFFFF;
+  --color-modal-border:     rgba(0,0,0,0.08);
+
+  /* Scrollbar */
+  --color-scrollbar:        rgba(0,0,0,0.15);
+  --color-scrollbar-hover:  rgba(0,0,0,0.25);
+
+  /* Theme picker */
+  --color-theme-option-bg:       #F5F5F7;
+  --color-theme-option-border:   #E5E5EA;
+  --color-theme-option-active-border: #007AFF;
+  --color-theme-option-active-bg: rgba(0, 122, 255, 0.08);
+
+  /* Link colors in chat */
+  --color-link: #007AFF;
+
+  /* Read ticks not applicable for iMessage */
+  --color-tick-read: #007AFF;
+  --color-tick-sent: #8E8E93;
+}
+
+/* iMessage sidebar has a subtle left border separator */
+[data-theme="imessage"] .sidebar {
+  border-right: 1px solid var(--color-border);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+
+/* iMessage header uses blur */
+[data-theme="imessage"] .chat-header {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* iMessage scrollbar */
+[data-theme="imessage"] ::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+}
+[data-theme="imessage"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.22);
+}

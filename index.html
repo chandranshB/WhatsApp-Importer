@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="whatsapp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ChatView – WhatsApp Chat Reader</title>
+  <meta name="description" content="Import and view your exported WhatsApp chats beautifully with multiple themes including WhatsApp and iMessage.">
+  <meta name="theme-color" content="#111B21">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/themes/whatsapp.css">
+  <link rel="stylesheet" href="css/themes/imessage.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+  <!-- Global Drop Overlay -->
+  <div id="drop-overlay" aria-hidden="true">
+    <div class="drop-overlay__inner">
+      <div class="drop-overlay__icon">📂</div>
+      <p class="drop-overlay__text">Drop your WhatsApp <code>.zip</code> or <code>.txt</code> export here</p>
+    </div>
+  </div>
+
+  <!-- ── Name Setup Modal ── -->
+  <div id="name-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="name-modal-title" hidden>
+    <div class="modal__backdrop" id="name-modal-backdrop"></div>
+    <div class="modal__card">
+      <div class="modal__header">
+        <div class="modal__icon">💬</div>
+        <h2 class="modal__title" id="name-modal-title">Who's in this chat?</h2>
+        <p class="modal__subtitle">Select which name is <strong>you</strong> (the one who exported the chat), and we'll set the other side accordingly.</p>
+      </div>
+      <div class="modal__body" id="name-modal-body">
+        <!-- Dynamically injected by app.js -->
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--ghost" id="name-modal-cancel">Cancel</button>
+        <button class="btn btn--primary" id="name-modal-confirm">Open Chat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Delete Confirm Modal ── -->
+  <div id="delete-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" hidden>
+    <div class="modal__backdrop" id="delete-modal-backdrop"></div>
+    <div class="modal__card modal__card--sm">
+      <div class="modal__header">
+        <div class="modal__icon">🗑️</div>
+        <h2 class="modal__title" id="delete-modal-title">Delete Chat?</h2>
+        <p class="modal__subtitle" id="delete-modal-body">This will permanently remove this chat from storage.</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--ghost" id="delete-modal-cancel">Cancel</button>
+        <button class="btn btn--danger" id="delete-modal-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main App Layout ── -->
+  <div id="app" class="app">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar" aria-label="Chat list">
+      <div class="sidebar__header">
+        <div class="sidebar__header-left">
+          <button id="sidebar-toggle" class="icon-btn" aria-label="Toggle sidebar" title="Toggle sidebar">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+          </button>
+          <span class="sidebar__brand">ChatView</span>
+        </div>
+        <div class="sidebar__header-right">
+          <button id="theme-btn" class="icon-btn" aria-label="Switch theme" title="Change theme">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          </button>
+          <button id="import-btn" class="icon-btn" aria-label="Import new chat" title="Import chat (.txt)">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Theme Picker Panel -->
+      <div id="theme-picker" class="theme-picker" hidden>
+        <p class="theme-picker__label">Choose a Theme</p>
+        <div class="theme-picker__grid">
+          <button class="theme-option" data-theme="whatsapp" aria-label="WhatsApp theme" title="WhatsApp">
+            <span class="theme-option__preview theme-option__preview--whatsapp">
+              <span class="theme-option__bubble-in"></span>
+              <span class="theme-option__bubble-out"></span>
+            </span>
+            <span class="theme-option__name">WhatsApp</span>
+            <span class="theme-option__check" aria-hidden="true">✓</span>
+          </button>
+          <button class="theme-option" data-theme="imessage" aria-label="iMessage theme" title="iMessage">
+            <span class="theme-option__preview theme-option__preview--imessage">
+              <span class="theme-option__bubble-in"></span>
+              <span class="theme-option__bubble-out"></span>
+            </span>
+            <span class="theme-option__name">iMessage</span>
+            <span class="theme-option__check" aria-hidden="true">✓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="sidebar__search">
+        <label class="search-wrap" for="search-input">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="search" id="search-input" class="search-input" placeholder="Search chats…" aria-label="Search imported chats" autocomplete="off">
+        </label>
+      </div>
+
+      <!-- Chat List -->
+      <div id="chat-list" class="chat-list" role="list" aria-label="Imported chats"></div>
+
+      <!-- Sidebar Empty State -->
+      <div id="sidebar-empty" class="sidebar__empty">
+        <div class="sidebar__empty-icon">💬</div>
+        <p class="sidebar__empty-title">No chats yet</p>
+        <p class="sidebar__empty-hint">Import a WhatsApp .txt export<br>to get started</p>
+        <button class="btn btn--primary btn--sm" id="sidebar-import-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Import Chat
+        </button>
+      </div>
+    </aside>
+
+    <!-- Chat Panel -->
+    <main id="chat-panel" class="chat-panel">
+
+      <!-- Welcome / Empty State -->
+      <div id="empty-state" class="empty-state">
+        <div class="empty-state__bubbles" aria-hidden="true">
+          <div class="empty-state__bubble empty-state__bubble--in">Hey! 👋</div>
+          <div class="empty-state__bubble empty-state__bubble--out">Open a chat →</div>
+          <div class="empty-state__bubble empty-state__bubble--in">Or import one!</div>
+        </div>
+        <h2 class="empty-state__title">Welcome to ChatView</h2>
+        <p class="empty-state__desc">Import your exported WhatsApp chats<br>(.txt file) and read them beautifully.</p>
+        <button class="btn btn--primary btn--lg" id="empty-import-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Import a Chat
+        </button>
+        <p class="empty-state__hint">Or drag &amp; drop a <strong>.zip</strong> or .txt file anywhere</p>
+      </div>
+
+      <!-- Active Chat View -->
+      <div id="chat-view" class="chat-view" hidden>
+
+        <!-- Chat Header -->
+        <header id="chat-header" class="chat-header">
+          <button id="back-btn" class="icon-btn chat-header__back" aria-label="Back to chat list">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div class="chat-header__avatar" id="chat-avatar" aria-hidden="true"></div>
+          <div class="chat-header__info">
+            <span class="chat-header__name" id="chat-name-display"></span>
+            <span class="chat-header__meta" id="chat-meta-display"></span>
+          </div>
+          <div class="chat-header__actions">
+            <button id="chat-delete-btn" class="icon-btn icon-btn--danger" aria-label="Delete this chat" title="Delete chat">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Area -->
+        <div id="messages-container" class="messages-container" role="log" aria-label="Chat messages" aria-live="polite">
+        <!-- Auto-load sentinel (IntersectionObserver watches this) -->
+        <div id="load-sentinel" aria-hidden="true"></div>
+
+        <!-- Load Earlier Button (fallback / shown while loading) -->
+        <div id="load-earlier-wrap" class="load-earlier-wrap" hidden>
+          <div class="load-earlier-spinner" id="load-earlier-spinner" hidden></div>
+          <button id="load-earlier-btn" class="btn btn--ghost btn--sm">↑ Load earlier messages</button>
+        </div>
+          <!-- Messages injected here -->
+          <div id="messages-inner" class="messages-inner"></div>
+        </div>
+
+        <!-- Storage Warning Toast -->
+        <div id="storage-toast" class="storage-toast" hidden role="alert" aria-live="assertive">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          <span id="storage-toast-text">Storage full — chat viewable but won't persist after refresh.</span>
+          <button class="storage-toast__close" id="storage-toast-close" aria-label="Dismiss">✕</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Hidden File Input -->
+  <input type="file" id="file-input" accept=".txt,.zip" style="display:none" aria-hidden="true" tabindex="-1">
+
+  <!-- Scripts -->
+  <script src="assets/jszip.min.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/themeManager.js"></script>
+  <script src="js/scrollManager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
