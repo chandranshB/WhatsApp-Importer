@@ -89,9 +89,6 @@ const App = (() => {
     document.addEventListener('dragover',  e => e.preventDefault(), false);
     document.addEventListener('drop',      _onDrop, false);
 
-    // Sidebar toggle (hamburger)
-    document.getElementById('sidebar-toggle').addEventListener('click', _toggleSidebar);
-
     // Mobile sidebar overlay
     const overlay = document.getElementById('mobile-sidebar-overlay');
     if (overlay) {
@@ -104,14 +101,15 @@ const App = (() => {
       _showEmptyState();
     });
 
-    // Theme button
+    // Theme & Mode buttons
     document.getElementById('theme-btn').addEventListener('click', () => ThemeManager.togglePicker());
+    document.getElementById('mode-btn').addEventListener('click', () => ThemeManager.toggleMode());
 
     // Theme picker options
     document.getElementById('theme-picker').addEventListener('click', e => {
-      const btn = e.target.closest('.theme-option[data-theme]');
+      const btn = e.target.closest('.theme-option[data-theme-option]');
       if (btn) {
-        ThemeManager.applyTheme(btn.dataset.theme);
+        ThemeManager.applyTheme(btn.dataset.themeOption);
         setTimeout(() => ThemeManager.closePicker(), 300);
       }
     });
@@ -142,12 +140,25 @@ const App = (() => {
       document.getElementById('storage-toast').hidden = true;
     });
 
+    // Lightbox
+    $messagesContainer.addEventListener('click', e => {
+      const mediaWrap = e.target.closest('.bubble-media-img-wrap, .bubble-media-video-wrap');
+      if (mediaWrap) {
+        e.preventDefault();
+        const isVideo = mediaWrap.dataset.isVideo === 'true';
+        _openLightbox(mediaWrap.href, isVideo);
+      }
+    });
+    document.getElementById('lightbox-close').addEventListener('click', _closeLightbox);
+    document.getElementById('lightbox-backdrop').addEventListener('click', _closeLightbox);
+
     // Keyboard shortcuts
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         ThemeManager.closePicker();
         _closeNameModal();
         _closeDeleteModal();
+        _closeLightbox();
       }
     });
 
@@ -157,6 +168,19 @@ const App = (() => {
       const btn    = document.getElementById('theme-btn');
       if (!picker.hidden && !picker.contains(e.target) && !btn.contains(e.target)) {
         ThemeManager.closePicker();
+      }
+    });
+
+    _initLightboxVideo();
+
+    // History API for Android back button to close lightbox
+    window.addEventListener('popstate', e => {
+      const lightbox = document.getElementById('lightbox');
+      if (!lightbox.hidden) {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(()=>{});
+        }
+        _closeLightbox(true); // true = don't double back
       }
     });
   }
@@ -227,10 +251,13 @@ const App = (() => {
         const mime     = _getMimeType(ext);
         if (!mime) return; // Skip unknown types
         mediaJobs.push(
-          entry.async('arraybuffer').then(buf => {
+          entry.async('arraybuffer').then(async buf => {
             const blob = new Blob([buf], { type: mime });
             const url  = URL.createObjectURL(blob);
             _mediaStore.set(`${pendingChatId}|${filename}`, url);
+            if (typeof MediaStorage !== 'undefined') {
+              await MediaStorage.saveMedia(pendingChatId, filename, blob);
+            }
           })
         );
       });
@@ -442,7 +469,8 @@ const App = (() => {
     $messagesContainer.scrollTop = 0;
 
     // Render the correct chunk for this chat
-    Renderer.renderMessages(messages, meta.myName, startFrom, id);
+    const missingMedia = Renderer.renderMessages(messages, meta.myName, startFrom, id);
+    _hydrateMedia(missingMedia);
 
     // ── Restore scroll synchronously ───────────────────────────────────────
     // Setting .scrollTop after Renderer.renderMessages forces a synchronous layout
@@ -505,16 +533,6 @@ const App = (() => {
     if (overlay) overlay.classList.remove('active');
   }
 
-  function _toggleSidebar() {
-    if (_isMobile) {
-      $sidebar.classList.toggle('mobile-open');
-      const overlay = document.getElementById('mobile-sidebar-overlay');
-      if (overlay) overlay.classList.toggle('active');
-    } else {
-      $sidebar.classList.toggle('collapsed');
-    }
-  }
-
   // ── Chat Deletion ─────────────────────────────────────────────────────────
 
   let _chatToDelete = null;
@@ -534,6 +552,138 @@ const App = (() => {
     _chatToDelete = null;
   }
 
+  // ── Lightbox ──────────────────────────────────────────────────────────────
+
+  let _lbVideoRaf = null;
+
+  function _initLightboxVideo() {
+    const video = document.getElementById('lightbox-video');
+    const wrap = document.getElementById('lightbox-video-wrap');
+    const playBtn = document.getElementById('lb-play-btn');
+    const fsBtn = document.getElementById('lb-fullscreen-btn');
+    const slider = document.getElementById('lb-progress');
+    const tCur = document.getElementById('lb-time-current');
+    const tTot = document.getElementById('lb-time-total');
+    
+    // Play/Pause
+    playBtn.addEventListener('click', e => {
+      e.stopPropagation(); // prevent toggling UI overlay
+      if (video.paused) video.play();
+      else video.pause();
+    });
+    
+    // Fullscreen
+    fsBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!document.fullscreenElement) {
+        wrap.requestFullscreen().catch(err => console.error(err));
+      } else {
+        document.exitFullscreen().catch(()=>{});
+      }
+    });
+    
+    // Fullscreen icon toggle
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = !!document.fullscreenElement;
+      if (isFs) fsBtn.classList.add('fullscreen');
+      else fsBtn.classList.remove('fullscreen');
+    });
+
+    // Update play/pause icons
+    video.addEventListener('play', () => {
+      playBtn.classList.add('playing');
+      _lbLoop();
+    });
+    video.addEventListener('pause', () => {
+      playBtn.classList.remove('playing');
+      cancelAnimationFrame(_lbVideoRaf);
+    });
+    
+    // Format time helpers
+    const fmt = t => {
+      if (!isFinite(t) || isNaN(t)) return '0:00';
+      return Math.floor(t / 60) + ':' + Math.floor(t % 60).toString().padStart(2, '0');
+    };
+
+    video.addEventListener('loadedmetadata', () => {
+      tTot.textContent = fmt(video.duration);
+      slider.max = video.duration || 100;
+    });
+
+    // Scrubber
+    let isDragging = false;
+    slider.addEventListener('input', () => {
+      isDragging = true;
+      tCur.textContent = fmt(slider.value);
+      slider.style.setProperty('--value', (slider.value / slider.max * 100) + '%');
+    });
+    slider.addEventListener('change', () => {
+      video.currentTime = slider.value;
+      isDragging = false;
+    });
+
+    // High performance UI loop
+    function _lbLoop() {
+      if (!isDragging && video.duration) {
+        slider.value = video.currentTime;
+        tCur.textContent = fmt(video.currentTime);
+        slider.style.setProperty('--value', (video.currentTime / video.duration * 100) + '%');
+      }
+      _lbVideoRaf = requestAnimationFrame(_lbLoop);
+    }
+
+    // Tap video to toggle controls visibility
+    video.addEventListener('click', () => {
+      wrap.classList.toggle('idle');
+    });
+  }
+
+  function _openLightbox(url, isVideo = false) {
+    const lightbox = document.getElementById('lightbox');
+    const img = document.getElementById('lightbox-img');
+    const videoWrap = document.getElementById('lightbox-video-wrap');
+    const video = document.getElementById('lightbox-video');
+    const closeBtn = document.getElementById('lightbox-close');
+    
+    if (isVideo) {
+      img.hidden = true;
+      videoWrap.hidden = false;
+      videoWrap.classList.remove('idle');
+      video.src = url;
+      video.play().catch(e => console.error('Video autoplay failed', e));
+    } else {
+      videoWrap.hidden = true;
+      img.hidden = false;
+      img.src = url;
+    }
+    
+    lightbox.hidden = false;
+    history.pushState({ lightbox: true }, ''); // Trap back button
+    
+    // Accessibility: focus the close button so keyboard users can close easily
+    closeBtn.focus();
+  }
+
+  function _closeLightbox(fromPopState = false) {
+    const lightbox = document.getElementById('lightbox');
+    const video = document.getElementById('lightbox-video');
+    const videoWrap = document.getElementById('lightbox-video-wrap');
+    
+    lightbox.hidden = true;
+    
+    if (!fromPopState && history.state && history.state.lightbox) {
+      history.back(); // Clean up the pushState if user clicked 'X'
+    }
+    
+    // Stop video playback and clear sources to save memory
+    if (video) {
+      video.pause();
+      video.src = '';
+      videoWrap.classList.remove('idle');
+    }
+    document.getElementById('lightbox-img').src = '';
+  }
+
   function _onDeleteModalConfirm() {
     if (!_chatToDelete) return;
     const id = _chatToDelete;
@@ -541,6 +691,11 @@ const App = (() => {
 
     // Revoke blob URLs for this chat to free memory
     _revokeMediaForChat(id);
+
+    // Delete from IDB if it exists
+    if (typeof MediaStorage !== 'undefined') {
+      MediaStorage.deleteChatMedia(id);
+    }
 
     Storage.deleteChat(id);
     _chats = _chats.filter(c => c.id !== id);
@@ -627,7 +782,8 @@ const App = (() => {
     const prevScrollHeight = container.scrollHeight;
 
     // ── Step 2: mutate the DOM (synchronous) ───────────────────────────────
-    Renderer.prependEarlierMessages();
+    const missingMedia = Renderer.prependEarlierMessages();
+    _hydrateMedia(missingMedia);
 
     // ── Step 3: correct scrollTop synchronously, in the same JS task ───────
     // Reading .scrollHeight here forces a synchronous layout so we get the
@@ -731,6 +887,29 @@ const App = (() => {
     toastTxt.textContent = '⚠️ ' + msg;
     toast.hidden = false;
     setTimeout(() => { toast.hidden = true; }, 5000);
+  }
+
+  // ── Missing Media Hydration ───────────────────────────────────────────────
+
+  function _hydrateMedia(missingMedia) {
+    if (!missingMedia || missingMedia.length === 0 || typeof MediaStorage === 'undefined') return;
+    
+    // Deduplicate
+    const unique = [...new Set(missingMedia)];
+    
+    unique.forEach(async filename => {
+      const blob = await MediaStorage.loadMedia(_activeId, filename);
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        _mediaStore.set(`${_activeId}|${filename}`, url);
+        
+        // Find all placeholders for this filename and upgrade them!
+        const els = document.querySelectorAll(`[data-media-filename="${CSS.escape(filename)}"]`);
+        els.forEach(el => {
+          Renderer.upgradeMediaElement(el, url);
+        });
+      }
+    });
   }
 
   function _onResize() {

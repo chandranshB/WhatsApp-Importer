@@ -19,12 +19,6 @@
   z-index: 100;
 }
 
-.sidebar.collapsed {
-  width: 0;
-  min-width: 0;
-  overflow: hidden;
-}
-
 /* ── Sidebar Header ── */
 .sidebar__header {
   display: flex;
@@ -142,6 +136,29 @@
 .theme-option__preview--imessage .theme-option__bubble-out {
   background: #007AFF;
   align-self: flex-end;
+}
+
+/* ── Theme Preview Dynamic Modes ── */
+[data-mode="light"] .theme-option__preview--whatsapp {
+  background: #efeae2;
+  border: 1px solid #d1d7db;
+}
+[data-mode="light"] .theme-option__preview--whatsapp .theme-option__bubble-in {
+  background: #ffffff;
+}
+[data-mode="light"] .theme-option__preview--whatsapp .theme-option__bubble-out {
+  background: #d9fdd3;
+}
+
+[data-mode="dark"] .theme-option__preview--imessage {
+  background: #000000;
+  border: 1px solid #38383a;
+}
+[data-mode="dark"] .theme-option__preview--imessage .theme-option__bubble-in {
+  background: #2C2C2E;
+}
+[data-mode="dark"] .theme-option__preview--imessage .theme-option__bubble-out {
+  background: #0A84FF;
 }
 
 .theme-option__name {
@@ -339,12 +356,6 @@
   .sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 20px 0 60px rgba(0,0,0,0.5);
-  }
-
-  .sidebar.collapsed {
-    width: 100%;
-    min-width: 100%;
-    transform: translateX(-100%);
   }
   
   .chat-item {

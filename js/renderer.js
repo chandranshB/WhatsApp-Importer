@@ -59,14 +59,14 @@ const Renderer = (() => {
 
   // ── Media Icons ───────────────────────────────────────────────────────────
   const MEDIA_ICONS = {
-    image:    '🖼️',
-    video:    '📹',
-    audio:    '🎵',
-    gif:      '🎞️',
-    sticker:  '😊',
-    document: '📄',
-    contact:  '👤',
-    media:    '📎',
+    image:    '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>',
+    video:    '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>',
+    audio:    '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>',
+    gif:      '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.5 9H13v6h-1.5zM9 9H6c-.6 0-1 .5-1 1v4c0 .5.4 1 1 1h3c.6 0 1-.5 1-1v-2H8.5v1.5h-2v-3H10V10c0-.5-.4-1-1-1zm10 1.5V9h-4.5v6H16v-2h2v-1.5h-2v-1z"/></svg>',
+    sticker:  '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM8.5 8c.83 0 1.5.67 1.5 1.5S9.33 11 8.5 11 7 10.33 7 9.5 7.67 8 8.5 8zm3.5 9.5c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5zM15.5 11c-.83 0-1.5-.67-1.5-1.5S14.67 8 15.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>',
+    document: '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>',
+    contact:  '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+    media:    '<svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-3.31-2.69-6-6-6S3 1.69 3 5v13.5c0 3.87 3.13 7 7 7s7-3.13 7-7V6h-1.5z"/></svg>',
   };
 
   // ── Render Chat List ──────────────────────────────────────────────────────
@@ -197,13 +197,20 @@ const Renderer = (() => {
   let _chatId       = null;  // ID of the chat currently rendered
   let _mediaData    = null;  // Map<"chatId|filename", blobURL> set from app
 
+  let _missingMedia = [];
+
   /** Called by app.js once so renderer can look up blob URLs. */
   function setMediaData(map) { _mediaData = map; }
 
   /** Return the blob URL for a media file, or null if not available. */
   function _mediaUrl(filename) {
     if (!_mediaData || !_chatId || !filename) return null;
-    return _mediaData.get(`${_chatId}|${filename}`) || null;
+    const url = _mediaData.get(`${_chatId}|${filename}`);
+    if (url) return url;
+    
+    // Missing from memory cache!
+    _missingMedia.push(filename);
+    return null;
   }
 
   /**
@@ -228,17 +235,20 @@ const Renderer = (() => {
 
     _renderChunk(_renderedFrom, messages.length, inner, false);
     _updateLoadEarlierBtn();
+    return _missingMedia;
   }
 
   /** Return the current rendered-from index (for scroll state saving). */
   function getRenderedFrom() { return _renderedFrom; }
 
   function prependEarlierMessages() {
+    _missingMedia = [];
     const inner = document.getElementById('messages-inner');
     const newFrom = Math.max(0, _renderedFrom - CHUNK_SIZE);
     _renderChunk(newFrom, _renderedFrom, inner, true);
     _renderedFrom = newFrom;
     _updateLoadEarlierBtn();
+    return _missingMedia;
   }
 
   function _updateLoadEarlierBtn() {
@@ -289,7 +299,7 @@ const Renderer = (() => {
       }
 
       // Determine message grouping
-      const isFirst = prevSender !== msg.sender || prevType === 'system' || msgDateKey !== WhatsAppParser.dateKey({ timestamp: msg.timestamp });
+      const isFirst = prevSender !== msg.sender || prevType === 'system';
       const isLast  = !next || next.sender !== msg.sender || next.type === 'system' ||
                       WhatsAppParser.dateKey(next.timestamp) !== msgDateKey;
 
@@ -345,14 +355,15 @@ const Renderer = (() => {
     // Bubble
     const bubble = document.createElement('div');
     const onlyEmoji = msg.text && isEmojiOnly(msg.text);
-    bubble.className = `bubble bubble--${dir}${onlyEmoji ? ' emoji-only' : ''}`;
+    const isSticker = msg.mediaType === 'sticker';
+    bubble.className = `bubble bubble--${dir}${onlyEmoji ? ' emoji-only' : ''}${isSticker ? ' bubble--sticker' : ''}`;
 
     let content = '';
 
     // Media
     if (msg.mediaType) {
       const url = _mediaUrl(msg.mediaFilename);
-      content += url ? _renderRealMedia(msg, url) : _renderMediaPlaceholder(msg);
+      content += url ? _renderRealMedia(msg, url) : _renderMediaPlaceholder(msg, true);
     }
 
     // Message text
@@ -378,7 +389,8 @@ const Renderer = (() => {
 
     switch (msg.mediaType) {
 
-      case 'image': {
+      case 'image':
+      case 'sticker': {
         // HEIC/HEIF not natively supported in Chrome — fall through to placeholder
         const ext = (msg.mediaFilename || '').split('.').pop().toLowerCase();
         if (ext === 'heic' || ext === 'heif') return _renderMediaPlaceholder(msg);
@@ -391,41 +403,93 @@ const Renderer = (() => {
 
       case 'video':
         return `
-          <video class="bubble-video" controls preload="metadata" playsinline>
-            <source src="${safeUrl}">
-          </video>`;
+          <a href="${safeUrl}" class="bubble-media-video-wrap" title="Play Video" data-is-video="true">
+            <video class="bubble-video-preview" preload="metadata" playsinline muted>
+              <source src="${safeUrl}#t=0.001">
+            </video>
+            <div class="bubble-video-play-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </a>`;
 
       case 'audio':
         return `
-          <div class="bubble-audio-row">
-            <span class="bubble-audio-icon" aria-hidden="true">🎤</span>
-            <audio class="bubble-audio" controls preload="metadata">
-              <source src="${safeUrl}">
-            </audio>
+          <div class="custom-audio">
+            <button class="custom-audio__play-btn" aria-label="Play/Pause">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <div class="custom-audio__progress-wrap">
+              <input type="range" class="custom-audio__slider" value="0" min="0" max="100" step="0.1" style="--value: 0%">
+              <div class="custom-audio__time">0:00</div>
+            </div>
+            <audio class="custom-audio__element" src="${safeUrl}" preload="metadata" hidden onloadedmetadata="
+              const t = this.parentElement.querySelector('.custom-audio__time');
+              if(t && this.duration && isFinite(this.duration)) {
+                t.textContent = Math.floor(this.duration / 60) + ':' + Math.floor(this.duration % 60).toString().padStart(2, '0');
+              }
+            "></audio>
           </div>`;
 
-      case 'document':
-        return `
-          <a href="${safeUrl}" download="${safeLabel}"
-             class="bubble-doc" title="Download ${safeLabel}">
-            <span class="bubble-doc__icon">📄</span>
-            <span class="bubble-doc__name">${safeLabel}</span>
-            <span class="bubble-doc__dl">↓ Download</span>
+      case 'document': {
+        const ext = safeLabel.split('.').pop().toLowerCase();
+        const isPdf = ext === 'pdf';
+        
+        let actionsHtml = '';
+        if (isPdf) {
+          actionsHtml += `
+            <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="bubble-doc__action bubble-doc__action--view" title="View PDF">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              View
+            </a>`;
+        }
+        actionsHtml += `
+          <a href="${safeUrl}" download="${safeLabel}" class="bubble-doc__action bubble-doc__action--download" title="Download ${safeLabel}">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Download
           </a>`;
+
+        return `
+          <div class="bubble-doc">
+            <div class="bubble-doc__info">
+              <div class="bubble-doc__icon">
+                ${MEDIA_ICONS.document}
+              </div>
+              <span class="bubble-doc__name" title="${safeLabel}">${safeLabel}</span>
+            </div>
+            <div class="bubble-doc__actions">
+              ${actionsHtml}
+            </div>
+          </div>`;
+      }
 
       default:
         return _renderMediaPlaceholder(msg);
     }
   }
 
-  /** Fallback placeholder for omitted / unsupported media. */
-  function _renderMediaPlaceholder(msg) {
+  /** Fallback placeholder for omitted / unsupported / loading media. */
+  function _renderMediaPlaceholder(msg, isMissing = false) {
     const icon = MEDIA_ICONS[msg.mediaType] || '📎';
+    
+    // Add attributes so we can upgrade it later when the Blob loads from IndexedDB
+    const attrs = isMissing ? `data-media-filename="${escHtml(msg.mediaFilename)}" data-media-type="${escHtml(msg.mediaType)}" data-media-label="${escHtml(msg.mediaLabel || '')}"` : '';
+    
     return `
-      <div class="media-placeholder">
-        <span class="media-placeholder__icon">${icon}</span>
+      <div class="media-placeholder" ${attrs}>
+        <span class="media-placeholder__icon">${isMissing ? '🔄' : icon}</span>
         <span class="media-placeholder__label">${escHtml(msg.mediaLabel || 'Media')}</span>
       </div>`;
+  }
+
+  /** Upgrades a placeholder element to the real media element. */
+  function upgradeMediaElement(el, url) {
+    const msg = {
+      mediaFilename: el.getAttribute('data-media-filename'),
+      mediaType: el.getAttribute('data-media-type'),
+      mediaLabel: el.getAttribute('data-media-label'),
+    };
+    el.outerHTML = _renderRealMedia(msg, url);
   }
 
   // ── Name Modal ────────────────────────────────────────────────────────────
@@ -485,6 +549,7 @@ const Renderer = (() => {
     prependEarlierMessages,
     getRenderedFrom,
     setMediaData,
+    upgradeMediaElement,
     buildNameModalBody,
     avatarColor,
     avatarInitials,

@@ -15,6 +15,7 @@ const Storage = (() => {
     SCROLL:     id => `chatview_scroll_${id}`,
     ACTIVE:     'chatview_active',
     THEME:      'chatview_theme',
+    MODE:       'chatview_mode',
   };
 
   // ── Internal helpers ──────────────────────────────────────────────────────
@@ -168,6 +169,11 @@ const Storage = (() => {
   function saveTheme(name) { _set(KEYS.THEME, name); }
   function loadTheme()     { return _get(KEYS.THEME) || 'whatsapp'; }
 
+  // ── Mode ──────────────────────────────────────────────────────────────────
+
+  function saveMode(mode) { _set(KEYS.MODE, mode); }
+  function loadMode()     { return _get(KEYS.MODE) || null; }
+
   // ── Utilities ─────────────────────────────────────────────────────────────
 
   /**
@@ -205,6 +211,8 @@ const Storage = (() => {
     clearActive,
     saveTheme,
     loadTheme,
+    saveMode,
+    loadMode,
     generateId,
     estimateFreeSpace,
   };

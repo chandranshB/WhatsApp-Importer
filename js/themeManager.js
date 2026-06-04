@@ -10,14 +10,27 @@ const ThemeManager = (() => {
 
   const THEMES = ['whatsapp', 'imessage'];
   let _current = 'whatsapp';
+  let _mode = null;
 
   /**
    * Initialize with saved theme or default.
    */
   function init() {
     const saved = Storage.loadTheme();
+    _mode = Storage.loadMode();
     applyTheme(saved, false);
     _updatePicker();
+  }
+
+  function getEffectiveMode() {
+    if (_mode) return _mode;
+    return _current === 'whatsapp' ? 'dark' : 'light';
+  }
+
+  function toggleMode() {
+    _mode = getEffectiveMode() === 'light' ? 'dark' : 'light';
+    Storage.saveMode(_mode);
+    applyTheme(_current, true);
   }
 
   /**
@@ -35,13 +48,19 @@ const ThemeManager = (() => {
     }
 
     document.documentElement.setAttribute('data-theme', name);
+    document.documentElement.setAttribute('data-mode', getEffectiveMode());
     Storage.saveTheme(name);
     _updatePicker();
 
     // Update meta theme-color for mobile browsers
-    const themeColors = { whatsapp: '#202C33', imessage: '#F5F5F7' };
     const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) metaTheme.content = themeColors[name] || '#111B21';
+    if (metaTheme) {
+      if (name === 'whatsapp') {
+        metaTheme.content = getEffectiveMode() === 'light' ? '#F0F2F5' : '#202C33';
+      } else {
+        metaTheme.content = getEffectiveMode() === 'dark' ? '#000000' : '#F5F5F7';
+      }
+    }
 
     if (!animate) {
       // Re-enable transitions after a frame
@@ -73,7 +92,7 @@ const ThemeManager = (() => {
    */
   function _updatePicker() {
     document.querySelectorAll('.theme-option').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.theme === _current);
+      btn.classList.toggle('active', btn.dataset.themeOption === _current);
     });
   }
 
@@ -93,6 +112,6 @@ const ThemeManager = (() => {
     picker.hidden = true;
   }
 
-  return { init, applyTheme, cycleTheme, current, togglePicker, closePicker };
+  return { init, applyTheme, cycleTheme, current, toggleMode, togglePicker, closePicker };
 
 })();

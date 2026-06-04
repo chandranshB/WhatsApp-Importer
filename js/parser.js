@@ -67,7 +67,8 @@ const WhatsAppParser = (() => {
       if (tsMatch) {
         // Commit previous message
         if (current) {
-          messages.push(finalize(current));
+          const finalized = finalize(current);
+          if (finalized) messages.push(finalized);
         }
 
         const dateStr = tsMatch[1];
@@ -108,7 +109,8 @@ const WhatsAppParser = (() => {
 
     // Commit last message
     if (current) {
-      messages.push(finalize(current));
+      const finalized = finalize(current);
+      if (finalized) messages.push(finalized);
     }
 
     const participants = getParticipants(messages);
@@ -155,7 +157,13 @@ const WhatsAppParser = (() => {
       if (attached) {
         const filename  = attached[1].trim();
         const ext       = attached[2].toLowerCase();
-        const mediaType = _extToType(ext);
+        let mediaType   = _extToType(ext);
+        
+        // Detect WhatsApp stickers (usually .webp or prefixed with STK-)
+        if (filename.toUpperCase().startsWith('STK') || ext === 'webp') {
+          mediaType = 'sticker';
+        }
+
         if (mediaType) {
           msg.mediaType     = mediaType;
           msg.mediaFilename = filename;           // Actual filename inside the ZIP
@@ -174,6 +182,12 @@ const WhatsAppParser = (() => {
       } else {
         // 3. Plain text
         msg.text = text;
+      }
+      
+      // If message is entirely empty (no text, no media), treat it as a View Once message.
+      if (!msg.text && !msg.mediaType) {
+        msg.mediaType = 'media';
+        msg.mediaLabel = 'View once message omitted';
       }
     }
     return msg;
