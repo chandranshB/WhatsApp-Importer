@@ -493,13 +493,9 @@
 .bubble-doc {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 4px;
+  padding: 4px 2px;
   min-width: 220px;
   max-width: 280px;
-  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .bubble-doc__info {
@@ -519,6 +515,11 @@
   color: #fff;
   border-radius: 8px;
   flex-shrink: 0;
+}
+
+.bubble-doc__icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .bubble-doc__name {
@@ -560,12 +561,12 @@
 }
 
 .bubble-doc__action--view {
-  background: rgba(var(--color-accent-rgb), 0.15);
+  background: transparent !important;
   color: var(--color-accent) !important;
 }
 
 .bubble-doc__action--view:hover {
-  background: rgba(var(--color-accent-rgb), 0.25);
+  background: var(--color-accent-subtle) !important;
 }
 
 
