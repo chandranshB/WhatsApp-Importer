@@ -92,6 +92,12 @@ const App = (() => {
     // Sidebar toggle (hamburger)
     document.getElementById('sidebar-toggle').addEventListener('click', _toggleSidebar);
 
+    // Mobile sidebar overlay
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', _hideSidebar);
+    }
+
     // Back button (mobile)
     document.getElementById('back-btn').addEventListener('click', () => {
       _showSidebar();
@@ -489,15 +495,21 @@ const App = (() => {
   function _showSidebar() {
     $sidebar.classList.add('mobile-open');
     $sidebar.classList.remove('collapsed');
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    if (overlay) overlay.classList.add('active');
   }
 
   function _hideSidebar() {
     $sidebar.classList.remove('mobile-open');
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    if (overlay) overlay.classList.remove('active');
   }
 
   function _toggleSidebar() {
     if (_isMobile) {
       $sidebar.classList.toggle('mobile-open');
+      const overlay = document.getElementById('mobile-sidebar-overlay');
+      if (overlay) overlay.classList.toggle('active');
     } else {
       $sidebar.classList.toggle('collapsed');
     }
@@ -727,6 +739,8 @@ const App = (() => {
     if (wasMobile !== _isMobile) {
       // Reset sidebar state on breakpoint change
       $sidebar.classList.remove('mobile-open', 'collapsed');
+      const overlay = document.getElementById('mobile-sidebar-overlay');
+      if (overlay) overlay.classList.remove('active');
     }
   }
 

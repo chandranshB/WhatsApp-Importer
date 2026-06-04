@@ -8,18 +8,18 @@
   --font-size-base: 0.9375rem;
 
   /* App backgrounds */
-  --color-bg-app:           #111B21;
-  --color-bg-sidebar:       #111B21;
-  --color-bg-sidebar-header:#202C33;
-  --color-bg-chat:          #0B141A;
-  --color-bg-header:        #202C33;
-  --color-bg-input:         #202C33;
+  --color-bg-app:           #0a1014;
+  --color-bg-sidebar:       #111b21;
+  --color-bg-sidebar-header:#202c33;
+  --color-bg-chat:          #0b141a;
+  --color-bg-header:        rgba(32, 44, 51, 0.85); /* transparent for glass */
+  --color-bg-input:         #2a3942;
 
   /* Chat wallpaper */
-  --color-chat-wallpaper:   #0B141A;
+  --color-chat-wallpaper:   #0b141a;
   --chat-wallpaper-image:   url('../assets/wallpaper-wa.png');
-  --chat-wallpaper-size:    420px;
-  --chat-wallpaper-opacity: 0.35;
+  --chat-wallpaper-size:    400px;
+  --chat-wallpaper-opacity: 0.4;
 
   /* Bubbles */
   --color-bg-bubble-out:    #005C4B;
@@ -30,12 +30,12 @@
   --color-bubble-in-tail:   #202C33;
 
   /* Bubble shadow */
-  --bubble-shadow:          0 1px 2px rgba(0,0,0,0.35);
+  --bubble-shadow:          0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* Bubble radius */
-  --bubble-radius-base:     10px;
-  --bubble-radius-out:      10px 10px 2px 10px;
-  --bubble-radius-in:       10px 10px 10px 2px;
+  --bubble-radius-base:     14px;
+  --bubble-radius-out:      14px 14px 4px 14px;
+  --bubble-radius-in:       14px 14px 14px 4px;
 
   /* Text */
   --color-text-primary:     #E9EDEF;

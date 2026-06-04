@@ -93,13 +93,16 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 12px;
-  height: 60px;
+  padding: 0 16px;
+  height: 64px;
   flex-shrink: 0;
   background: var(--color-bg-header);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--color-border);
   position: relative;
   z-index: 10;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 .chat-header__back {
@@ -178,7 +181,7 @@
 .messages-container::before {
   content: '';
   position: fixed;
-  inset: 60px 0 0 0; /* below header */
+  inset: 64px 0 0 0; /* below header */
   background-image: var(--chat-wallpaper-image);
   background-size: var(--chat-wallpaper-size);
   opacity: var(--chat-wallpaper-opacity);
@@ -307,15 +310,19 @@
 /* ── Bubble ── */
 .bubble {
   position: relative;
-  padding: 7px 12px 6px;
+  padding: 8px 14px 7px;
   word-break: break-word;
   word-wrap: break-word;
   white-space: pre-wrap;
-  line-height: 1.45;
-  font-size: 0.9rem;
+  line-height: 1.5;
+  font-size: 0.95rem;
   box-shadow: var(--bubble-shadow);
   max-width: 100%;
-  transition: background 0.3s ease;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+}
+
+.bubble:hover {
+  transform: scale(1.01);
 }
 
 .bubble--out {
