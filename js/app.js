@@ -607,15 +607,7 @@ const App = (() => {
       }
     }
     
-    const activeChat = _chats.find(c => c.id === _activeId);
-    let receiver = 'Unknown';
-    if (activeChat) {
-      if (sender === activeChat.myName) {
-         receiver = activeChat.name; // In 1-on-1 this is the other person. In groups, it's the group.
-      } else {
-         receiver = activeChat.myName; // The message was received by the owner of the export
-      }
-    }
+
     
     const _esc = str => String(str).replace(/[&<>"']/g, m => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -635,45 +627,137 @@ const App = (() => {
        else if (row.querySelector('.custom-audio')) msgText = '[Voice Message / Audio]';
     }
 
+    const activeChat = _chats.find(c => c.id === _activeId);
+    let receiver = 'Unknown';
+    if (activeChat && activeChat.participants) {
+      const otherParticipants = activeChat.participants.filter(p => p.name !== sender).map(p => p.name);
+      if (otherParticipants.length > 0) {
+        if (otherParticipants.length === 1) {
+          receiver = otherParticipants[0];
+        } else if (otherParticipants.length <= 3) {
+          receiver = otherParticipants.join(', ');
+        } else {
+          receiver = `${otherParticipants[0]}, ${otherParticipants[1]} and ${otherParticipants.length - 2} others`;
+        }
+      }
+    }
+    
     const body = document.getElementById('msg-info-body');
     body.innerHTML = `
       <div style="background: var(--color-bg-chat); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-accent); margin-bottom: 8px; font-weight: 700;">Content</div>
-        <div style="font-size: 1.1rem; font-weight: 400; color: var(--color-text-primary); line-height: 1.6; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto;">${_esc(msgText || '[Empty]')}</div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-accent); margin-bottom: 8px; font-weight: 700;">Content</div>
+        <div style="font-size: 1.05rem; font-weight: 400; color: var(--color-text-primary); line-height: 1.5; white-space: pre-wrap; word-break: break-word;">${_esc(msgText || '[Empty]')}</div>
       </div>
       
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 12px; border: 1px solid var(--color-border);">
-          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Sender</div>
-          <div style="font-size: 0.95rem; font-weight: 600;">${_esc(sender || 'System')}</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 10px; border: 1px solid var(--color-border);">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Sender</div>
+          <div style="font-size: 0.9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${_esc(sender || 'System')}</div>
         </div>
-        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 12px; border: 1px solid var(--color-border);">
-          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Receiver (Context)</div>
-          <div style="font-size: 0.95rem; font-weight: 600;">${_esc(receiver || 'Unknown')}</div>
+        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 10px; border: 1px solid var(--color-border);">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Receiver</div>
+          <div style="font-size: 0.9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${_esc(receiver)}</div>
         </div>
-        <div style="grid-column: span 2; background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 12px; border: 1px solid var(--color-border);">
-          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Date &amp; Time</div>
-          <div style="font-size: 0.95rem; font-weight: 600;">${_esc(timeHtml)}</div>
+        <div style="grid-column: span 2; background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 10px; border: 1px solid var(--color-border);">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Date &amp; Time</div>
+          <div style="font-size: 0.9rem; font-weight: 600;">${_esc(timeHtml)}</div>
         </div>
       </div>
     `;
 
     const shareBtn = document.getElementById('msg-info-share');
     shareBtn.onclick = async () => {
-      const shareText = `💬 WhatsApp Message Info\n\nFrom: ${sender || 'System'}\nTo: ${receiver || 'Unknown'}\nDate: ${timeHtml}\n\nMessage:\n${msgText || '[Empty]'}`;
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: 'Message Details', text: shareText });
-        } catch (err) { /* user cancelled */ }
-      } else {
-        const blob = new Blob([shareText], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Message_Info_${Date.now()}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
+      // Generate Image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const width = 800;
+      const padding = 40;
+      const contentWidth = width - (padding * 2);
+      
+      const paragraphs = (msgText || '[Empty]').split('\n');
+      const lines = [];
+      ctx.font = '24px sans-serif';
+      for (const p of paragraphs) {
+        if (!p.trim()) { lines.push(''); continue; }
+        const words = p.split(' ');
+        let currentLine = '';
+        for (const word of words) {
+          const testLine = currentLine + word + ' ';
+          if (ctx.measureText(testLine).width > contentWidth && currentLine.length > 0) {
+            lines.push(currentLine.trim());
+            currentLine = word + ' ';
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine.trim()) lines.push(currentLine.trim());
       }
+      
+      const lineHeight = 34;
+      const height = padding + 50 + padding + (lines.length * lineHeight) + padding + 100 + padding;
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw BG
+      ctx.fillStyle = '#111b21';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Draw Header
+      ctx.fillStyle = '#00a884';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.fillText('Message Info', padding, padding + 30);
+      
+      // Draw Text
+      ctx.fillStyle = '#e9edef';
+      ctx.font = '24px sans-serif';
+      let y = padding + 90;
+      for (const line of lines) {
+        ctx.fillText(line, padding, y);
+        y += lineHeight;
+      }
+      
+      // Draw Meta
+      y += 20;
+      ctx.fillStyle = '#202c33';
+      if (ctx.roundRect) ctx.roundRect(padding, y, contentWidth, 100, 12);
+      else ctx.fillRect(padding, y, contentWidth, 100);
+      ctx.fill();
+      
+      ctx.fillStyle = '#8696a0';
+      ctx.font = '16px sans-serif';
+      ctx.fillText('SENDER', padding + 20, y + 30);
+      ctx.fillText('RECEIVER', padding + 250, y + 30);
+      ctx.fillText('DATE & TIME', padding + 500, y + 30);
+      
+      ctx.fillStyle = '#e9edef';
+      ctx.font = 'bold 20px sans-serif';
+      
+      const sText = sender || 'System';
+      ctx.fillText(sText.length > 15 ? sText.substring(0, 12) + '...' : sText, padding + 20, y + 60);
+      
+      const rText = receiver;
+      ctx.fillText(rText.length > 15 ? rText.substring(0, 12) + '...' : rText, padding + 250, y + 60);
+      
+      ctx.fillText(timeHtml, padding + 500, y + 60);
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'MessageInfo.png', { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'Message Details' });
+          } catch (err) { /* user cancelled */ }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Message_Info_${Date.now()}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png');
     };
     
     document.getElementById('msg-info-modal').hidden = false;
