@@ -1,7 +1,7 @@
 /**
  * themeManager.js — Theme Switcher
  * Manages CSS [data-theme] attribute and persists choice.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';

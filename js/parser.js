@@ -1,7 +1,7 @@
 /**
  * parser.js — WhatsApp Export Parser
  * Handles Android & iOS export formats, 12h/24h, multi-line messages.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';
@@ -285,16 +285,18 @@ const WhatsAppParser = (() => {
   /**
    * Format a Date for display.
    */
-  function formatTime(date) {
-    if (!(date instanceof Date) || isNaN(date)) return '';
+  function formatTime(dateInput) {
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (isNaN(date)) return '';
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   /**
    * Format a Date as a chat date divider string.
    */
-  function formatDateDivider(date) {
-    if (!(date instanceof Date) || isNaN(date)) return '';
+  function formatDateDivider(dateInput) {
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (isNaN(date)) return '';
     const now = new Date();
     const diffDays = Math.floor((now - date) / 86400000);
 

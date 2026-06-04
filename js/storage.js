@@ -2,7 +2,7 @@
  * storage.js — localStorage Manager
  * Stores chats, scroll positions, theme preference.
  * Handles QuotaExceededError gracefully.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';

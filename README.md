@@ -1,10 +1,10 @@
-# 💬 ChatView – WhatsApp Chat Reader
+# WhatsApp Export Viewer
 
 <div align="center">
 
-**A beautiful, privacy-first WhatsApp chat viewer with multiple themes**
+**A secure, client-side WhatsApp chat export viewer with customizable themes.**
 
-[Features](#features) • [Demo](#demo) • [Installation](#installation) • [Usage](#usage) • [Themes](#themes) • [Privacy](#privacy)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Architecture](#architecture) • [Privacy](#privacy)
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
@@ -16,298 +16,170 @@
 
 ---
 
-## ✨ Features
+## Features
 
-- 📱 **Universal Format Support** – Import `.txt` or `.zip` WhatsApp exports from Android & iOS
-- 🎨 **Multiple Themes** – Switch between WhatsApp and iMessage styles
-- 🖼️ **Rich Media Display** – View images, videos, audio, documents, and GIFs from `.zip` exports
-- 💾 **Persistent Storage** – Chats are saved locally using IndexedDB
-- 🔍 **Smart Search** – Filter through your imported chats instantly
-- 📜 **Infinite Scroll** – Smooth navigation through thousands of messages
-- 🌓 **Theme Switching** – Seamlessly switch visual themes without losing your place
-- 📂 **Multi-Chat Management** – Import and organize multiple conversations
-- 🚀 **No Dependencies** – Pure vanilla JavaScript, runs entirely offline
-- 🔒 **100% Private** – All data stays in your browser, nothing leaves your device
-
----
-
-## 🎬 Demo
-
-Import your WhatsApp chat export and watch it come to life with a beautiful, familiar interface.
-
-### WhatsApp Theme
-Classic green bubbles with the iconic WhatsApp wallpaper – feels just like home.
-
-### iMessage Theme
-Clean, modern blue and grey bubbles with Apple's signature design language.
+- **Universal Format Support**: Import `.txt` or `.zip` WhatsApp exports from both Android and iOS platforms.
+- **Multiple Themes**: Includes high-fidelity representations of WhatsApp and iMessage interfaces.
+- **Rich Media Display**: Full support for viewing images, videos, audio, documents, and GIFs included in `.zip` exports.
+- **Persistent Storage**: Utilizes IndexedDB for local, client-side persistence of imported chat data.
+- **Smart Search**: Real-time filtering capabilities for imported conversations.
+- **Infinite Scroll**: Optimized rendering pipeline capable of handling thousands of messages efficiently.
+- **Multi-Chat Management**: Isolate, import, and organize multiple chat histories concurrently.
+- **Zero Dependencies**: Developed with vanilla JavaScript; executes entirely offline post-load.
+- **Data Privacy**: Strictly client-side execution ensures no data transmission to external servers.
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### Option 1: Clone & Open
+### Option 1: Direct Usage
 
 ```bash
 git clone https://github.com/yourusername/whatsapp-reader.git
 cd whatsapp-reader
 ```
 
-Open `index.html` in your browser – that's it! No build process, no npm install, no webpack.
+Open `index.html` in any modern web browser. The application requires no build process or dependency installation.
 
-### Option 2: Download ZIP
+### Option 2: Local Server (Recommended for Media Support)
 
-1. Download this repository as a ZIP file
-2. Extract it anywhere on your computer
-3. Open `index.html` in any modern browser
-
-### Option 3: Serve Locally
-
-If you prefer a local server (recommended for full ZIP media support):
+To ensure full compatibility with local file access restrictions in modern browsers (specifically for ZIP media support), serving the application over HTTP is recommended.
 
 ```bash
-# Python 3
+# Using Python 3
 python -m http.server 8000
 
-# Node.js (if http-server is installed)
+# Using Node.js (requires http-server)
 npx http-server
 ```
 
-Then visit `http://localhost:8000`
+Navigate to `http://localhost:8000` in your browser.
 
 ---
 
-## 📖 Usage
+## Usage
 
 ### Exporting from WhatsApp
 
-#### On Android/iOS:
-1. Open the WhatsApp chat you want to export
-2. Tap the **⋮** (three dots) menu → **More** → **Export chat**
-3. Choose **Include Media** (for images/videos) or **Without Media** (text only)
-4. Save the export file to your device
+**Android / iOS:**
+1. Open the target WhatsApp conversation.
+2. Access the menu (three dots) -> **More** -> **Export chat**.
+3. Select **Include Media** or **Without Media** based on your requirements.
+4. Save the generated `.txt` or `.zip` file locally.
 
-### Importing to ChatView
+### Importing to WhatsApp Export Viewer
 
-1. **Launch the app** – Open `index.html` in your browser
-2. **Import your chat** – Click the **+** button or drag & drop your `.txt` or `.zip` file
-3. **Identify yourself** – Select which name is you (the person who exported the chat)
-4. **Enjoy!** – Your chat appears with beautiful styling and smooth scrolling
+1. Launch `index.html` in your browser.
+2. Use the import function to load your `.txt` or `.zip` export file.
+3. Identify the primary user (the account from which the export was generated) to correctly map outgoing messages.
+4. The chat will be parsed and rendered immediately.
 
-### Supported Files
+### Supported File Formats
 
-| File Type | Format | Media Included |
-|-----------|--------|----------------|
-| `.txt` | Plain text export | ❌ No media |
-| `.zip` | Archive with `.txt` + media files | ✅ Images, videos, audio, documents |
-
----
-
-## 🎨 Themes
-
-ChatView comes with two carefully crafted themes:
-
-### 🟢 WhatsApp Theme
-- Authentic green outgoing messages (`#DCF8C6`)
-- WhatsApp's classic teal header
-- Iconic chat wallpaper background
-- System messages styled like the real app
-
-### 🔵 iMessage Theme
-- iOS-style blue bubbles for your messages
-- Clean grey bubbles for incoming messages
-- Smooth gradient backgrounds
-- Apple San Francisco font styling
-
-**Switch themes instantly** using the 🎨 palette button in the sidebar.
+| File Type | Format | Media Support |
+|-----------|--------|---------------|
+| `.txt` | Plain text export | None |
+| `.zip` | Archive containing `.txt` and media | Images, video, audio, documents |
 
 ---
 
-## 🗂️ Project Structure
+## Architecture
 
-```
+WhatsApp Export Viewer is built on a modular, component-based architecture using vanilla JavaScript to minimize footprint and maximize performance.
+
+### Project Structure
+
+```text
 whatsapp-reader/
-├── index.html              # Main HTML file
+├── index.html              # Main application entry point
 ├── assets/
-│   ├── jszip.min.js       # ZIP file handling (only dependency)
-│   └── wallpaper-wa.png   # WhatsApp background texture
+│   ├── jszip.min.js        # ZIP archive manipulation (sole dependency)
+│   └── wallpaper-wa.png    # Default background asset
 ├── css/
-│   ├── base.css           # Global styles & layout
-│   ├── sidebar.css        # Chat list sidebar
-│   ├── chat.css           # Message view
-│   ├── animations.css     # Transitions & effects
-│   └── themes/
-│       ├── whatsapp.css   # WhatsApp theme
-│       └── imessage.css   # iMessage theme
+│   ├── base.css            # Core layout and styling
+│   ├── sidebar.css         # Chat navigation styling
+│   ├── chat.css            # Message rendering styles
+│   ├── animations.css      # Transition definitions
+│   └── themes/             # Pluggable UI themes
+│       ├── whatsapp.css    
+│       └── imessage.css    
 └── js/
-    ├── app.js             # Main app orchestrator
-    ├── parser.js          # WhatsApp export format parser
-    ├── renderer.js        # DOM rendering engine
-    ├── storage.js         # IndexedDB persistence layer
-    ├── themeManager.js    # Theme switching logic
-    └── scrollManager.js   # Scroll state & auto-load
+    ├── app.js              # Application initialization
+    ├── parser.js           # Export format parsing engine
+    ├── renderer.js         # DOM manipulation and view updates
+    ├── storage.js          # IndexedDB abstraction layer
+    ├── themeManager.js     # UI theme state management
+    └── scrollManager.js    # Virtualization and scroll handling
 ```
 
----
+### Technical Implementation
 
-## 🔧 Technical Highlights
-
-### Architecture
-- **Modular Design** – Each JS module has a single, clear responsibility
-- **Memory Efficient** – Only renders visible messages, loads earlier content on demand
-- **Scroll Preservation** – Remembers your exact position when switching chats
-- **Smart Parsing** – Handles Android & iOS formats, 12h/24h times, multi-line messages
-
-### Browser Storage
-- **IndexedDB** for chat messages and metadata
-- **Blob URLs** for media files (session-scoped, auto-cleaned)
-- **LocalStorage** for theme preference
-
-### Media Handling
-When you import a `.zip` export:
-1. Extracts all media files (images, videos, audio, documents)
-2. Creates in-memory Blob URLs for instant access
-3. Matches media files to messages by filename
-4. Automatically revokes Blobs when chats are deleted
+- **Memory Management**: Employs DOM virtualization techniques to maintain performance when rendering extensive chat histories.
+- **State Persistence**: 
+  - Chat data and application state are stored securely in IndexedDB.
+  - Media assets utilize auto-revoking Blob URLs to prevent memory leaks.
+  - Theme preferences are retained via LocalStorage.
+- **Parsing Engine**: Robust regular expression parsing handles disparate formatting across Android/iOS exports, varying time formats, and multi-line messages.
 
 ---
 
-## 🔒 Privacy & Security
+## Privacy and Security
 
-**Your data never leaves your device.** ChatView is a 100% client-side application:
+WhatsApp Export Viewer operates on a strict zero-trust model regarding user data:
 
-- ✅ No server communication
-- ✅ No analytics or tracking
-- ✅ No external API calls
-- ✅ All data stored locally in your browser
-- ✅ Works completely offline after first load
+- **Client-Side Only**: All data processing and rendering occurs locally within the browser context.
+- **No Telemetry**: The application includes no tracking, analytics, or external telemetry of any kind.
+- **Offline Capability**: Once the initial assets are loaded, the application functions entirely offline.
 
-**What gets stored?**
-- Chat messages (IndexedDB)
-- Media files (temporary Blob URLs, cleared on page close)
-- Theme preference (LocalStorage)
-
-**Clearing your data:**
-- Delete individual chats using the 🗑️ button
-- Clear all data by clearing your browser storage
+To purge data, users may delete individual chats via the interface or clear their browser's site data.
 
 ---
 
-## 🌐 Browser Compatibility
+## Compatibility
 
-| Browser | Version | Support |
-|---------|---------|---------|
-| Chrome | 60+ | ✅ Full |
-| Firefox | 55+ | ✅ Full |
-| Safari | 11+ | ✅ Full |
-| Edge | 79+ | ✅ Full |
+| Browser | Minimum Version | Status |
+|---------|-----------------|--------|
+| Chrome  | 60+             | Fully Supported |
+| Firefox | 55+             | Fully Supported |
+| Safari  | 11+             | Fully Supported |
+| Edge    | 79+             | Fully Supported |
 
-**Required APIs:**
+**Required Browser APIs:**
 - IndexedDB
 - FileReader API
-- Blob URLs
-- ES6+ JavaScript
+- URL.createObjectURL (Blob URLs)
+- ES6 JavaScript support
 
 ---
 
-## 🐛 Known Limitations
+## Development and Contribution
 
-- **Date Parsing** – Ambiguous date formats (DD/MM vs MM/DD) use international format (DD/MM) as default
-- **Group Chats** – Fully supported, but participant avatars are auto-generated from names
-- **Encrypted Media** – Cannot decrypt media from encrypted backups (use WhatsApp's export feature)
-- **Storage Limits** – Browser storage quotas apply (~50MB–10GB depending on browser)
+Contributions to the project are evaluated via pull requests. 
 
----
+### Guidelines
 
-## 🛠️ Development
+- Maintain the zero-dependency philosophy for the core engine (excluding necessary utilities like JSZip).
+- Adhere to vanilla JavaScript (ES6+) standards without transpilation.
+- Follow BEM methodology for CSS additions.
+- Ensure all modules remain self-contained via IIFE patterns to prevent global scope pollution.
 
-Want to contribute or customize?
+### Roadmap
 
-### Prerequisites
-- A modern browser
-- A text editor
-- (Optional) A local web server for testing
-
-### Getting Started
-
-```bash
-# Clone the repo
-git clone https://github.com/yourusername/whatsapp-reader.git
-cd whatsapp-reader
-
-# No build step needed! Just open index.html or serve locally:
-python -m http.server 8000
-```
-
-### Code Style
-- **Vanilla JavaScript** – No frameworks, no transpilers
-- **Modern ES6+** – Classes, arrow functions, async/await
-- **IIFE Modules** – Self-contained, no global pollution
-- **BEM CSS** – Consistent, scalable naming conventions
+- Implementation of full-text indexing and search.
+- Bidirectional export capabilities (re-exporting to `.txt`).
+- Native dark mode system integration.
+- Analytical tools for chat statistics.
 
 ---
 
-## 📝 FAQ
+## License
 
-**Q: Can I import multiple chats?**  
-A: Yes! Import as many chats as you want and switch between them from the sidebar.
-
-**Q: Will my chats sync across devices?**  
-A: No, chats are stored locally in your browser. Export them from each device separately.
-
-**Q: Can I search within messages?**  
-A: Currently, you can filter the chat list by name. Full-text message search is planned for a future release.
-
-**Q: What happens if I run out of storage?**  
-A: The app will show a warning and keep the chat viewable for the current session, but it won't persist after refresh.
-
-**Q: Can I export my chats back to .txt?**  
-A: Not yet – this feature is on the roadmap!
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Full-text message search across all chats
-- [ ] Export chats back to `.txt` format
-- [ ] Dark mode variants for both themes
-- [ ] Reply/quote message highlighting
-- [ ] Starred messages view
-- [ ] Chat statistics & analytics
-- [ ] Custom theme creator
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Whether it's bug reports, feature requests, or pull requests:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **JSZip** – For ZIP file handling
-- **WhatsApp** – For the export format
-- **Apple** – For iMessage design inspiration
-- **You** – For using and supporting this project!
+This project is licensed under the MIT License. See the `LICENSE` file for full terms and conditions.
 
 ---
 
 <div align="center">
 
-**Made with ❤️ for privacy-conscious chat readers**
-
-⭐ Star this repo if you find it useful!
+**Developed for privacy-conscious data portability.**
 
 </div>

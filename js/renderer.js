@@ -1,7 +1,7 @@
 /**
  * renderer.js — DOM Renderer
  * Renders chat list sidebar items and message bubbles.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';
@@ -342,7 +342,8 @@ const Renderer = (() => {
     const row = document.createElement('div');
     row.className = `msg-row msg-row--${dir}${groupClass ? ' ' + groupClass : ''}${groupClass === '' || groupClass === 'group-top' ? ' group-start' : ''}${animate ? ' animate-in' : ''}`;
     row.setAttribute('data-sender', msg.sender);
-    row.setAttribute('data-ts', msg.timestamp?.toISOString?.() || '');
+    const tsDate = msg.timestamp ? new Date(msg.timestamp) : null;
+    row.setAttribute('data-ts', (tsDate && !isNaN(tsDate)) ? tsDate.toISOString() : '');
 
     // Sender name (show for "in" messages if first in group and group chat)
     if (!isOut && showSender && msg.sender) {
@@ -371,12 +372,19 @@ const Renderer = (() => {
       content += `<span class="bubble-text">${linkify(msg.text)}</span>`;
     }
 
-    // Timestamp
+    // Timestamp (inside for WhatsApp)
     const timeStr = WhatsAppParser.formatTime(msg.timestamp);
     content += `<span class="bubble-meta"><span class="bubble-time">${escHtml(timeStr)}</span></span>`;
 
     bubble.innerHTML = content;
     row.appendChild(bubble);
+
+    // Timestamp (outside for iMessage)
+    const timeOut = document.createElement('div');
+    timeOut.className = 'msg-time-out';
+    timeOut.textContent = timeStr;
+    row.appendChild(timeOut);
+
     return row;
   }
 

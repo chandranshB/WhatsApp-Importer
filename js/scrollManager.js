@@ -1,7 +1,7 @@
 /**
  * scrollManager.js — Per-chat Scroll Position Saver/Restorer
  * Saves { fromIndex, scrollTop } so the exact rendered chunk + position is restored.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';

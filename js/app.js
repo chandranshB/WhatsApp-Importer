@@ -1,7 +1,7 @@
 /**
  * app.js — Main Application Orchestrator
  * Wires together parser, storage, renderer, themeManager, scrollManager.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';
@@ -129,6 +129,39 @@ const App = (() => {
     document.getElementById('delete-modal-cancel').addEventListener('click', _closeDeleteModal);
     document.getElementById('delete-modal-backdrop').addEventListener('click', _closeDeleteModal);
 
+    // Message Info Modal
+    document.getElementById('msg-info-close').addEventListener('click', _closeMsgInfoModal);
+    document.getElementById('msg-info-backdrop').addEventListener('click', _closeMsgInfoModal);
+
+    // Message Info Context Menu (Desktop)
+    $messagesContainer.addEventListener('contextmenu', e => {
+      const row = e.target.closest('.msg-row');
+      if (row) {
+        e.preventDefault();
+        _openMsgInfoModal(row);
+      }
+    });
+
+    // Message Info Long Press (Mobile)
+    let pressTimer;
+    let isDragging = false;
+    $messagesContainer.addEventListener('touchstart', e => {
+      const row = e.target.closest('.msg-row');
+      if (!row) return;
+      isDragging = false;
+      pressTimer = setTimeout(() => {
+        if (!isDragging) _openMsgInfoModal(row);
+      }, 500); // 500ms long press
+    }, { passive: true });
+
+    $messagesContainer.addEventListener('touchmove', () => {
+      isDragging = true;
+      clearTimeout(pressTimer);
+    }, { passive: true });
+
+    $messagesContainer.addEventListener('touchend', () => clearTimeout(pressTimer));
+    $messagesContainer.addEventListener('touchcancel', () => clearTimeout(pressTimer));
+
     // Search
     document.getElementById('search-input').addEventListener('input', e => _filterChatList(e.target.value));
 
@@ -159,6 +192,7 @@ const App = (() => {
         _closeNameModal();
         _closeDeleteModal();
         _closeLightbox();
+        _closeMsgInfoModal();
       }
     });
 
@@ -550,6 +584,103 @@ const App = (() => {
   function _closeDeleteModal() {
     document.getElementById('delete-modal').hidden = true;
     _chatToDelete = null;
+  }
+
+  // ── Message Info Modal ────────────────────────────────────────────────────
+
+  function _openMsgInfoModal(row) {
+    const sender = row.getAttribute('data-sender');
+    const tsStr = row.getAttribute('data-ts');
+    
+    let timeHtml = 'Unknown';
+    if (tsStr) {
+      const date = new Date(tsStr);
+      if (!isNaN(date)) {
+        timeHtml = date.toLocaleString(undefined, {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    }
+    
+    const activeChat = _chats.find(c => c.id === _activeId);
+    let receiver = 'Unknown';
+    if (activeChat) {
+      if (sender === activeChat.myName) {
+         receiver = activeChat.name; // In 1-on-1 this is the other person. In groups, it's the group.
+      } else {
+         receiver = activeChat.myName; // The message was received by the owner of the export
+      }
+    }
+    
+    const _esc = str => String(str).replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[m]);
+
+    let msgText = '';
+    const textEl = row.querySelector('.bubble-text');
+    if (textEl) {
+       msgText = textEl.textContent;
+    } else {
+       const img = row.querySelector('.bubble-img');
+       const vid = row.querySelector('.bubble-video-preview');
+       const doc = row.querySelector('.bubble-doc__name');
+       if (img) msgText = '[Image / Sticker]';
+       else if (vid) msgText = '[Video]';
+       else if (doc) msgText = `[Document: ${doc.textContent}]`;
+       else if (row.querySelector('.custom-audio')) msgText = '[Voice Message / Audio]';
+    }
+
+    const body = document.getElementById('msg-info-body');
+    body.innerHTML = `
+      <div style="background: var(--color-bg-chat); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-accent); margin-bottom: 8px; font-weight: 700;">Content</div>
+        <div style="font-size: 1.1rem; font-weight: 400; color: var(--color-text-primary); line-height: 1.6; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto;">${_esc(msgText || '[Empty]')}</div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 12px; border: 1px solid var(--color-border);">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Sender</div>
+          <div style="font-size: 0.95rem; font-weight: 600;">${_esc(sender || 'System')}</div>
+        </div>
+        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 12px; border: 1px solid var(--color-border);">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Receiver (Context)</div>
+          <div style="font-size: 0.95rem; font-weight: 600;">${_esc(receiver || 'Unknown')}</div>
+        </div>
+        <div style="grid-column: span 2; background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 12px; border: 1px solid var(--color-border);">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Date &amp; Time</div>
+          <div style="font-size: 0.95rem; font-weight: 600;">${_esc(timeHtml)}</div>
+        </div>
+      </div>
+    `;
+
+    const shareBtn = document.getElementById('msg-info-share');
+    shareBtn.onclick = async () => {
+      const shareText = `💬 WhatsApp Message Info\n\nFrom: ${sender || 'System'}\nTo: ${receiver || 'Unknown'}\nDate: ${timeHtml}\n\nMessage:\n${msgText || '[Empty]'}`;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'Message Details', text: shareText });
+        } catch (err) { /* user cancelled */ }
+      } else {
+        const blob = new Blob([shareText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Message_Info_${Date.now()}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    };
+    
+    document.getElementById('msg-info-modal').hidden = false;
+  }
+
+  function _closeMsgInfoModal() {
+    document.getElementById('msg-info-modal').hidden = true;
   }
 
   // ── Lightbox ──────────────────────────────────────────────────────────────

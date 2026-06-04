@@ -1,7 +1,7 @@
 /**
  * mediaStorage.js — IndexedDB Manager for Media
  * Stores Blobs associated with chats so media persists across sessions.
- * ChatView – WhatsApp Chat Reader
+ * WhatsApp Export Viewer
  */
 
 'use strict';
