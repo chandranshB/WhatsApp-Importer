@@ -506,30 +506,19 @@ const App = (() => {
     const missingMedia = Renderer.renderMessages(messages, meta.myName, startFrom, id);
     _hydrateMedia(missingMedia);
 
-    // ── Restore scroll synchronously ───────────────────────────────────────
-    // Setting .scrollTop after Renderer.renderMessages forces a synchronous layout
-    // (browser computes the new scrollHeight) and applies the position BEFORE any
-    // paint, so the user never sees the wrong scroll position.
     if (targetScroll !== null) {
       $messagesContainer.scrollTop = targetScroll;
     } else {
-      // First open or no saved state — jump to the latest messages
       ScrollManager.scrollToBottom(false);
     }
 
     _showChatView();
     if (_isMobile) _hideSidebar();
 
-    // Begin tracking scroll for THIS chat
     ScrollManager.startTracking(id);
 
-    // Connect the sentinel observer after the initial paint.
-    // The single RAF ensures the browser has painted the correct scroll position
-    // before the observer starts watching, preventing a spurious load-earlier call.
-    // The stale guard (id === _activeId) ensures a fast chat-switch discards
-    // this callback if a newer chat has already been opened.
     requestAnimationFrame(() => {
-      if (_activeId !== id) return; // Stale — another chat was opened first
+      if (_activeId !== id) return;
       _setupSentinelObserver();
     });
   }
@@ -586,32 +575,25 @@ const App = (() => {
     _chatToDelete = null;
   }
 
-  // ── Message Info Modal ────────────────────────────────────────────────────
+  // ── Message Info Modal (Wikipedia + Apple Style) ──────────────────────────
 
   function _openMsgInfoModal(row) {
     const sender = row.getAttribute('data-sender');
     const tsStr = row.getAttribute('data-ts');
     
-    let timeHtml = 'Unknown';
+    let timeHtml = 'Unknown Date';
+    let timeCanvas = 'Unknown Date';
     if (tsStr) {
       const date = new Date(tsStr);
       if (!isNaN(date)) {
-        timeHtml = date.toLocaleString(undefined, {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
+        const dateStr = date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const timeOnly = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+        timeHtml = '<div style="font-weight: 500; margin-bottom: 3px;">' + dateStr + '</div><div style="opacity: 0.6; font-size: 0.9em;">' + timeOnly + '</div>';
+        timeCanvas = dateStr + ' • ' + timeOnly;
       }
     }
     
-
-    
-    const _esc = str => String(str).replace(/[&<>"']/g, m => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    })[m]);
+    const _esc = str => String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
 
     let msgText = '';
     const textEl = row.querySelector('.bubble-text');
@@ -623,60 +605,54 @@ const App = (() => {
        const doc = row.querySelector('.bubble-doc__name');
        if (img) msgText = '[Image / Sticker]';
        else if (vid) msgText = '[Video]';
-       else if (doc) msgText = `[Document: ${doc.textContent}]`;
+       else if (doc) msgText = '[Document: ' + doc.textContent + ']';
        else if (row.querySelector('.custom-audio')) msgText = '[Voice Message / Audio]';
     }
 
     const activeChat = _chats.find(c => c.id === _activeId);
-    let receiver = 'Unknown';
+    let receiver = '';
     if (activeChat && activeChat.participants) {
-      const otherParticipants = activeChat.participants.filter(p => p.name !== sender).map(p => p.name);
+      const otherParticipants = activeChat.participants
+        .filter(p => p.name && p.name !== sender && p.name !== activeChat.name)
+        .map(p => p.name.trim())
+        .filter(n => n.length > 0);
+      
       if (otherParticipants.length > 0) {
-        if (otherParticipants.length === 1) {
-          receiver = otherParticipants[0];
-        } else if (otherParticipants.length <= 3) {
-          receiver = otherParticipants.join(', ');
-        } else {
-          receiver = `${otherParticipants[0]}, ${otherParticipants[1]} and ${otherParticipants.length - 2} others`;
-        }
+        if (otherParticipants.length === 1) receiver = otherParticipants[0];
+        else if (otherParticipants.length <= 3) receiver = otherParticipants.join(', ');
+        else receiver = otherParticipants[0] + ', ' + otherParticipants[1] + ' and ' + (otherParticipants.length - 2) + ' others';
       }
     }
     
     const body = document.getElementById('msg-info-body');
-    body.innerHTML = `
-      <div style="background: var(--color-bg-chat); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-accent); margin-bottom: 8px; font-weight: 700;">Content</div>
-        <div style="font-size: 1.05rem; font-weight: 400; color: var(--color-text-primary); line-height: 1.5; white-space: pre-wrap; word-break: break-word;">${_esc(msgText || '[Empty]')}</div>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 10px; border: 1px solid var(--color-border);">
-          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Sender</div>
-          <div style="font-size: 0.9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${_esc(sender || 'System')}</div>
-        </div>
-        <div style="background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 10px; border: 1px solid var(--color-border);">
-          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Receiver</div>
-          <div style="font-size: 0.9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${_esc(receiver)}</div>
-        </div>
-        <div style="grid-column: span 2; background: var(--color-bg-sidebar-header); padding: 12px; border-radius: 10px; border: 1px solid var(--color-border);">
-          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 4px;">Date &amp; Time</div>
-          <div style="font-size: 0.9rem; font-weight: 600;">${_esc(timeHtml)}</div>
-        </div>
-      </div>
-    `;
+    const isApple = document.documentElement.getAttribute('data-theme') === 'imessage';
+    const msgFontFamily = isApple ? "var(--font-family, -apple-system, 'SF Pro Text', sans-serif)" : "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif";
+    
+    body.innerHTML = 
+      '<div style="background: var(--color-bg-chat); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">' +
+        '<div style="display: flex; align-items: baseline; margin-bottom: 20px; flex-wrap: wrap;">' +
+          '<div style="font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); font-family: var(--font-family, \'SF Pro Display\', -apple-system, sans-serif);">' + _esc(sender || 'System') + '</div>' +
+          (receiver ? '<div style="font-size: 0.95rem; font-weight: 400; color: var(--color-text-secondary); margin-left: 8px;">to ' + _esc(receiver) + '</div>' : '') +
+        '</div>' +
+        '<div style="font-size: 1.25rem; font-weight: 400; color: var(--color-text-primary); line-height: 1.6; white-space: pre-wrap; word-break: break-word; font-family: ' + msgFontFamily + ';">' + _esc(msgText || '[Empty]') + '</div>' +
+        '<div style="margin-top: 24px; font-size: 0.9rem; color: var(--color-text-secondary); border-top: 1px solid var(--color-border); padding-top: 16px; font-family: var(--font-family, \'SF Pro Display\', -apple-system, sans-serif);">' +
+          timeHtml +
+        '</div>' +
+      '</div>';
 
     const shareBtn = document.getElementById('msg-info-share');
     shareBtn.onclick = async () => {
-      // Generate Image
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const width = 800;
-      const padding = 40;
-      const contentWidth = width - (padding * 2);
+      const width = 1200;
+      const padding = 80;
+      const cardPadding = 60;
+      const contentWidth = width - (padding * 2) - (cardPadding * 2);
       
       const paragraphs = (msgText || '[Empty]').split('\n');
       const lines = [];
-      ctx.font = '24px sans-serif';
+      const isAppleMode = document.documentElement.getAttribute('data-theme') === 'imessage';
+      ctx.font = isAppleMode ? '36px "SF Pro Display", -apple-system, "SF Pro Text", sans-serif' : '36px Georgia, serif';
       for (const p of paragraphs) {
         if (!p.trim()) { lines.push(''); continue; }
         const words = p.split(' ');
@@ -693,67 +669,75 @@ const App = (() => {
         if (currentLine.trim()) lines.push(currentLine.trim());
       }
       
-      const lineHeight = 34;
-      const height = padding + 50 + padding + (lines.length * lineHeight) + padding + 100 + padding;
+      const lineHeight = 56;
+      const textHeight = lines.length * lineHeight;
+      const cardHeight = cardPadding + 40 + 40 + textHeight + 60 + 60 + cardPadding;
+      const height = padding * 2 + cardHeight;
       
       canvas.width = width;
       canvas.height = height;
       
-      // Draw BG
-      ctx.fillStyle = '#111b21';
+      ctx.fillStyle = '#f5f5f7';
       ctx.fillRect(0, 0, width, height);
       
-      // Draw Header
-      ctx.fillStyle = '#00a884';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.fillText('Message Info', padding, padding + 30);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
       
-      // Draw Text
-      ctx.fillStyle = '#e9edef';
-      ctx.font = '24px sans-serif';
-      let y = padding + 90;
+      ctx.fillStyle = '#ffffff';
+      if (ctx.roundRect) ctx.roundRect(padding, padding, width - padding * 2, cardHeight, 32);
+      else ctx.fillRect(padding, padding, width - padding * 2, cardHeight);
+      ctx.fill();
+      
+      ctx.shadowColor = 'transparent';
+      
+      let y = padding + cardPadding;
+      
+      ctx.fillStyle = '#1d1d1f';
+      ctx.font = 'bold 30px "SF Pro Display", -apple-system, "SF Pro Text", sans-serif';
+      const senderText = sender || 'System';
+      ctx.fillText(senderText, padding + cardPadding, y + 30);
+      const senderWidth = ctx.measureText(senderText).width;
+      
+      if (receiver) {
+        ctx.fillStyle = '#86868b';
+        ctx.font = '500 24px "SF Pro Display", -apple-system, "SF Pro Text", sans-serif';
+        let rText = receiver;
+        if (rText.length > 30) rText = rText.substring(0, 27) + '...';
+        ctx.fillText('to ' + rText, padding + cardPadding + senderWidth + 12, y + 30);
+      }
+      
+      y += 40 + 40;
+      ctx.fillStyle = '#1d1d1f';
+      ctx.font = isAppleMode ? '36px "SF Pro Display", -apple-system, "SF Pro Text", sans-serif' : '36px Georgia, serif';
       for (const line of lines) {
-        ctx.fillText(line, padding, y);
+        ctx.fillText(line, padding + cardPadding, y + 26);
         y += lineHeight;
       }
       
-      // Draw Meta
-      y += 20;
-      ctx.fillStyle = '#202c33';
-      if (ctx.roundRect) ctx.roundRect(padding, y, contentWidth, 100, 12);
-      else ctx.fillRect(padding, y, contentWidth, 100);
-      ctx.fill();
+      y += 60 - lineHeight;
+      ctx.beginPath();
+      ctx.moveTo(padding + cardPadding, y);
+      ctx.lineTo(width - padding - cardPadding, y);
+      ctx.strokeStyle = '#e5e5ea';
+      ctx.lineWidth = 1;
+      ctx.stroke();
       
-      ctx.fillStyle = '#8696a0';
-      ctx.font = '16px sans-serif';
-      ctx.fillText('SENDER', padding + 20, y + 30);
-      ctx.fillText('RECEIVER', padding + 250, y + 30);
-      ctx.fillText('DATE & TIME', padding + 500, y + 30);
-      
-      ctx.fillStyle = '#e9edef';
-      ctx.font = 'bold 20px sans-serif';
-      
-      const sText = sender || 'System';
-      ctx.fillText(sText.length > 15 ? sText.substring(0, 12) + '...' : sText, padding + 20, y + 60);
-      
-      const rText = receiver;
-      ctx.fillText(rText.length > 15 ? rText.substring(0, 12) + '...' : rText, padding + 250, y + 60);
-      
-      ctx.fillText(timeHtml, padding + 500, y + 60);
+      y += 40;
+      ctx.fillStyle = '#86868b';
+      ctx.font = '500 22px -apple-system, sans-serif';
+      ctx.fillText(timeCanvas, padding + cardPadding, y + 20);
       
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        const file = new File([blob], 'MessageInfo.png', { type: 'image/png' });
-        
+        const file = new File([blob], 'MessageQuote.png', { type: 'image/png' });
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: 'Message Details' });
-          } catch (err) { /* user cancelled */ }
+          try { await navigator.share({ files: [file], title: 'Message Quote' }); } catch (e) {}
         } else {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `Message_Info_${Date.now()}.png`;
+          a.download = 'Message_Quote_' + Date.now() + '.png';
           a.click();
           URL.revokeObjectURL(url);
         }
@@ -762,6 +746,7 @@ const App = (() => {
     
     document.getElementById('msg-info-modal').hidden = false;
   }
+
 
   function _closeMsgInfoModal() {
     document.getElementById('msg-info-modal').hidden = true;
