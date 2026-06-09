@@ -9,6 +9,7 @@ import './styles/themes/imessage/index.css'
 import './styles/sidebar.css'
 import './styles/chat.css'
 import './styles/animations.css'
+import './styles/wrapped.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
