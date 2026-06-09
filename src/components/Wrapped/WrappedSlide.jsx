@@ -267,7 +267,10 @@ export default function WrappedSlide({ slideIndex, stats }) {
             <motion.p className="slide-text mt-8" variants={itemVariants}>In {longestGap.start?.toLocaleDateString(undefined, { month: 'long' })}, you and <strong>{them}</strong> went</motion.p>
             <motion.div className="big-number quiet-number" variants={scaleVariants}>{longestGap.days}</motion.div>
             <motion.p className="slide-text" variants={itemVariants}>days without a single message.</motion.p>
-            <motion.p className="slide-text mt-8" variants={itemVariants}>But <strong>{longestGap.ender || 'you'}</strong> always came back. <Heart size={24} className="inline-block ml-2" /></motion.p>
+            <motion.div className="slide-text mt-8" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }} variants={itemVariants}>
+              <span>But <strong>{longestGap.ender || 'you'}</strong> always came back.</span>
+              <Heart size={28} style={{ flexShrink: 0 }} />
+            </motion.div>
           </motion.div>
         );
 

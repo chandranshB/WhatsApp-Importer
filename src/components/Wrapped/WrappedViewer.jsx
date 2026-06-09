@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { X } from 'lucide-react';
 import { Storage } from '../../utils/storage';
 import { generateWrappedStats } from '../../utils/wrappedAnalytics';
 import WrappedSlide from './WrappedSlide';
@@ -106,8 +107,6 @@ export default function WrappedViewer({ chatId, myName, customNames, onClose }) 
 
   return (
     <div className="wrapped-viewer-container">
-      <button className="wrapped-close-btn" onClick={onClose}>×</button>
-      
       <div className="wrapped-story-card" 
            onPointerDown={handlePointerDown}
            onPointerUp={handlePointerUp}
@@ -132,6 +131,15 @@ export default function WrappedViewer({ chatId, myName, customNames, onClose }) 
         </div>
 
         <WrappedSlide slideIndex={currentSlide} stats={stats} />
+        
+        <button 
+          className="wrapped-close-btn" 
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
+        >
+          <X size={32} strokeWidth={3} />
+        </button>
       </div>
     </div>
   );
