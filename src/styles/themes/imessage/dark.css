@@ -1,0 +1,40 @@
+/* ── iMessage Dark Mode Colors ── */
+[data-theme="imessage"][data-mode="dark"] {
+  --color-bg-app:           #000000;
+  --color-bg-sidebar:       #000000;
+  --color-bg-sidebar-header:#000000;
+  --color-bg-chat:          #000000;
+  --color-bg-header:        rgba(28, 28, 30, 0.92);
+  --color-bg-input:         #1C1C1E;
+  --color-chat-wallpaper:   #000000;
+  --color-bg-bubble-out:    #0A84FF;
+  --color-bg-bubble-in:     #2C2C2E;
+  --color-text-bubble-out:  #FFFFFF;
+  --color-text-bubble-in:   #FFFFFF;
+  --color-bubble-out-tail:  #0A84FF;
+  --color-bubble-in-tail:   #2C2C2E;
+  --color-text-primary:     #FFFFFF;
+  --color-text-secondary:   #98989D;
+  --color-text-timestamp:   #98989D;
+  --color-text-sender:      #98989D;
+  --color-border:           #38383A;
+  --color-icon:             #98989D;
+  --color-icon-hover-bg:    rgba(255,255,255,0.1);
+  --color-icon-hover:       #FFFFFF;
+  --color-divider-bg:       #1C1C1E;
+  --color-divider-text:     #98989D;
+  --color-system-bg:        #1C1C1E;
+  --color-system-text:      #98989D;
+  --color-sidebar-item-hover: rgba(255,255,255,0.08);
+  --color-sidebar-item-active: rgba(10, 132, 255, 0.15);
+  --color-search-bg:        #1C1C1E;
+  --color-search-placeholder: #98989D;
+  --color-input-bg:         #1C1C1E;
+  --color-modal-bg:         #1C1C1E;
+  --color-modal-border:     rgba(255,255,255,0.15);
+  --color-scrollbar:        rgba(255,255,255,0.15);
+  --color-scrollbar-hover:  rgba(255,255,255,0.25);
+  --color-theme-option-bg:       #1C1C1E;
+  --color-theme-option-border:   #38383A;
+  --color-theme-option-active-bg: rgba(10, 132, 255, 0.15);
+}

@@ -1,0 +1,119 @@
+/* ── Fake Input Bar overrides ── */
+[data-theme="whatsapp"] .chat-input-bar .btn-plus { display: none; }
+[data-theme="whatsapp"] .chat-input-bar .btn-imessage-send { display: none; }
+
+[data-theme="whatsapp"] .chat-input-wrapper {
+  border: none;
+  border-radius: 24px;
+  padding: 6px 16px;
+  gap: 14px;
+}
+
+[data-theme="whatsapp"] .chat-input-bar .btn-wa-mic {
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+}
+
+/* ── WhatsApp Bubbles (Tails at TOP) ── */
+/* Align non-tail bubbles with tail bubbles */
+[data-theme="whatsapp"] .msg-row.group-middle.msg-row--out,
+[data-theme="whatsapp"] .msg-row.group-bottom.msg-row--out { margin-right: calc(var(--msg-margin-out, 24px) + 8px); }
+
+[data-theme="whatsapp"] .msg-row.group-middle.msg-row--in,
+[data-theme="whatsapp"] .msg-row.group-bottom.msg-row--in { margin-left: calc(var(--msg-margin-in, 16px) + 8px); }
+
+/* Base radius for middle/bottom (no tail) */
+[data-theme="whatsapp"] .msg-row.group-middle .bubble--out,
+[data-theme="whatsapp"] .msg-row.group-bottom .bubble--out { border-radius: var(--bubble-radius-base); }
+
+[data-theme="whatsapp"] .msg-row.group-middle .bubble--in,
+[data-theme="whatsapp"] .msg-row.group-bottom .bubble--in { border-radius: var(--bubble-radius-base); }
+
+/* Standalone & Top bubbles get the sharp corner */
+[data-theme="whatsapp"] .msg-row:not(.group-middle):not(.group-bottom) .bubble--out { border-radius: var(--bubble-radius-out); }
+[data-theme="whatsapp"] .msg-row:not(.group-middle):not(.group-bottom) .bubble--in  { border-radius: var(--bubble-radius-in); }
+
+/* The triangle tails */
+[data-theme="whatsapp"] .msg-row:not(.group-middle):not(.group-bottom) .bubble--out::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border-top: 0px solid transparent;
+  border-right: 0px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 8px solid var(--color-bubble-out-tail);
+}
+
+[data-theme="whatsapp"] .msg-row:not(.group-middle):not(.group-bottom) .bubble--in::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 0px solid transparent;
+  border-left: 0px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-right: 8px solid var(--color-bubble-in-tail);
+}
+
+/* ── WhatsApp Audio Player ── */
+[data-theme="whatsapp"] .custom-audio {
+  padding: 4px 2px;
+}
+[data-theme="whatsapp"] .custom-audio__play-btn {
+  width: 38px;
+  height: 38px;
+}
+[data-theme="whatsapp"] .custom-audio__play-btn svg {
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-secondary);
+}
+[data-theme="whatsapp"] .msg-row--out .custom-audio__play-btn svg {
+  color: rgba(255, 255, 255, 0.85);
+}
+[data-theme="whatsapp"] .custom-audio__slider {
+  background-image: linear-gradient(to right, var(--color-accent) var(--value, 0%), rgba(255,255,255,0.25) var(--value, 0%));
+  background-size: 100% 4px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 2px;
+}
+[data-theme="whatsapp"] .msg-row--in .custom-audio__slider {
+  background-image: linear-gradient(to right, var(--color-accent) var(--value, 0%), rgba(0,0,0,0.12) var(--value, 0%));
+}
+[data-theme="whatsapp"][data-mode="light"] .msg-row--out .custom-audio__slider {
+  background-image: linear-gradient(to right, #005C4B var(--value, 0%), rgba(0, 92, 75, 0.2) var(--value, 0%));
+}
+[data-theme="whatsapp"] .custom-audio__slider::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+[data-theme="whatsapp"] .custom-audio__slider::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+[data-theme="whatsapp"] .msg-row--out .custom-audio__slider::-webkit-slider-thumb,
+[data-theme="whatsapp"] .msg-row--out .custom-audio__slider::-moz-range-thumb {
+  background: #fff;
+}
+[data-theme="whatsapp"][data-mode="light"] .msg-row--out .custom-audio__slider::-webkit-slider-thumb,
+[data-theme="whatsapp"][data-mode="light"] .msg-row--out .custom-audio__slider::-moz-range-thumb {
+  background: #005C4B;
+}
+[data-theme="whatsapp"][data-mode="light"] .msg-row--out .custom-audio__play-btn svg {
+  color: #005C4B;
+}

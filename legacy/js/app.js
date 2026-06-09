@@ -676,18 +676,28 @@ const App = (() => {
       
       canvas.width = width;
       canvas.height = height;
-      
-      ctx.fillStyle = '#f5f5f7';
-      ctx.fillRect(0, 0, width, height);
-      
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-      ctx.shadowBlur = 40;
-      ctx.shadowOffsetY = 20;
-      
-      ctx.fillStyle = '#ffffff';
-      if (ctx.roundRect) ctx.roundRect(padding, padding, width - padding * 2, cardHeight, 32);
-      else ctx.fillRect(padding, padding, width - padding * 2, cardHeight);
-      ctx.fill();
+
+      // Load background doodle
+      const bgImg = new Image();
+      bgImg.onload = () => {
+        ctx.fillStyle = '#e9edef';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.globalAlpha = 0.45;
+        const pattern = ctx.createPattern(bgImg, 'repeat');
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalAlpha = 1.0;
+
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 20;
+
+        // Semi-transparent card
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+        if (ctx.roundRect) ctx.roundRect(padding, padding, width - padding * 2, cardHeight, 32);
+        else ctx.fillRect(padding, padding, width - padding * 2, cardHeight);
+        ctx.fill();
       
       ctx.shadowColor = 'transparent';
       
@@ -742,6 +752,9 @@ const App = (() => {
           URL.revokeObjectURL(url);
         }
       }, 'image/png');
+      }; // end of bgImg.onload
+
+      bgImg.src = doodleSVG;
     };
     
     document.getElementById('msg-info-modal').hidden = false;

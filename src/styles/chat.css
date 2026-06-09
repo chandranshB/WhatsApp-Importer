@@ -1,0 +1,794 @@
+/* ═══════════════════════════════════════════════
+   CHAT.CSS — Chat Panel, Header, Bubbles
+   ═══════════════════════════════════════════════ */
+
+/* ── Chat Panel ── */
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-chat);
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+}
+
+/* ── Empty State ── */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 12px;
+  background: var(--color-bg-chat);
+}
+
+.empty-state[hidden] { display: none; }
+
+.empty-state__bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.empty-state__bubble {
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: bubble-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+.empty-state__bubble--in {
+  background: var(--color-bg-bubble-in);
+  color: var(--color-text-bubble-in);
+  align-self: flex-start;
+  animation-delay: 0.1s;
+}
+
+.empty-state__bubble--out {
+  background: var(--color-bg-bubble-out);
+  color: var(--color-text-bubble-out);
+  align-self: flex-end;
+  animation-delay: 0.3s;
+}
+
+.empty-state__bubble:nth-child(3) { animation-delay: 0.5s; }
+
+.empty-state__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.empty-state__desc {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.empty-state__hint {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* ── Chat View ── */
+.chat-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-view[hidden] { display: none; }
+
+/* ── Chat Header ── */
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 64px;
+  flex-shrink: 0;
+  background: var(--color-bg-header);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.chat-header__back {
+  display: none; /* shown on mobile */
+}
+
+.chat-header__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.chat-header__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chat-header__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.chat-header__meta {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Messages Container ── */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0 16px;
+  position: relative;
+  scroll-behavior: smooth;
+
+  /* Wallpaper */
+  background-color: var(--color-chat-wallpaper);
+
+  /*
+   * CRITICAL: Disable the browser's automatic scroll anchoring.
+   * When we prepend content we correct scrollTop ourselves, synchronously.
+   * If the browser also adjusts scrollTop (scroll anchoring), the two corrections
+   * fight each other and the user gets a visible jump. Turn it off entirely.
+   */
+  overflow-anchor: none;
+}
+
+/* Wallpaper overlay via pseudo-element */
+.messages-container::before {
+  content: '';
+  position: fixed;
+  inset: 64px 0 0 0; /* below header */
+  background-image: var(--chat-wallpaper-image);
+  background-size: var(--chat-wallpaper-size);
+  opacity: var(--chat-wallpaper-opacity);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.messages-inner {
+  position: relative;
+  z-index: 1;
+  padding: 0 12px;
+  box-sizing: border-box;
+  overflow-x: hidden !important;
+}
+
+/* ── Load Earlier ── */
+.load-earlier-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.load-earlier-wrap[hidden] { display: none; }
+
+/* Sentinel for IntersectionObserver */
+#load-sentinel {
+  height: 1px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Spinner shown while loading earlier messages */
+.load-earlier-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.load-earlier-spinner[hidden] { display: none; }
+
+/* ── Date Divider ── */
+.date-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 6px;
+}
+
+.date-divider__label {
+  background: var(--color-divider-bg);
+  color: var(--color-divider-text);
+  font-size: 0.73rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── System Message ── */
+.system-msg {
+  display: flex;
+  justify-content: center;
+  padding: 4px 16px;
+}
+
+.system-msg__text {
+  background: var(--color-system-bg);
+  color: var(--color-system-text);
+  font-size: 0.75rem;
+  padding: 5px 14px;
+  border-radius: 8px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+/* ── Message Row ── */
+.msg-row {
+  display: flex;
+  flex-direction: column;
+  max-width: 72%;
+  /* No animation by default — applied selectively via .animate-in */
+  opacity: 1;
+  margin-bottom: 2px;
+}
+
+@media (min-width: 1024px) {
+  .msg-row {
+    max-width: 65%;
+  }
+}
+
+.msg-row.animate-in {
+  animation: bubble-in 0.22s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+.msg-row--out {
+  align-self: flex-end;
+  align-items: flex-end;
+  margin-left: auto;
+  margin-right: var(--msg-margin-out, 24px);
+}
+
+.msg-row--in {
+  align-self: flex-start;
+  align-items: flex-start;
+  margin-left: var(--msg-margin-in, 16px);
+}
+
+/* Extra spacing before first message in a group */
+.msg-row.group-start {
+  margin-top: 8px;
+}
+
+/* ── Sender Name (group chats / first in sequence) ── */
+.msg-sender {
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--color-text-sender);
+  margin-bottom: 2px;
+  padding: 0 12px;
+}
+
+/* ── Bubble ── */
+.bubble {
+  position: relative;
+  padding: 8px 14px 7px;
+  word-break: break-word;
+  word-wrap: break-word;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  box-shadow: var(--bubble-shadow);
+  max-width: 100%;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+}
+
+.msg-text {
+  white-space: pre-wrap;
+}
+
+.bubble:hover {
+  transform: scale(1.01);
+}
+
+.bubble--out {
+  background: var(--color-bg-bubble-out);
+  color: var(--color-text-bubble-out);
+  border-radius: var(--bubble-radius-out);
+}
+
+.bubble--in {
+  background: var(--color-bg-bubble-in);
+  color: var(--color-text-bubble-in);
+  border-radius: var(--bubble-radius-in);
+}
+
+/* Bubble grouping and tails are handled per-theme (whatsapp.css / imessage.css) */
+/* ── Bubble Meta (timestamp) ── */
+.bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  float: right;
+  margin-left: 12px;
+  margin-bottom: -2px;
+}
+
+.bubble-time {
+  font-size: 0.68rem;
+  color: var(--color-text-timestamp);
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.bubble--out .bubble-time {
+  color: rgba(255,255,255,0.65);
+}
+
+.msg-time-out {
+  display: none;
+}
+
+/* ── Media Placeholder ── */
+.media-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+}
+
+.media-placeholder__icon { font-size: 1.4rem; }
+
+.media-placeholder__label {
+  font-size: 0.82rem;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* ── Real Media — Images ── */
+.msg-row--in  .bubble:has(.bubble-img) ,
+.msg-row--out .bubble:has(.bubble-img) { padding: 4px 4px 6px; }
+
+.bubble-media-img-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 4px;
+  cursor: zoom-in;
+  line-height: 0;
+  min-width: 150px;
+  min-height: 150px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bubble-img {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.bubble-media-img-wrap:hover .bubble-img { opacity: 0.9; }
+
+/* Widen row for images/video so they don't look cramped */
+.msg-row:has(.bubble-img),
+.msg-row:has(.bubble-media-video-wrap) { max-width: 55%; }
+
+/* ── Real Media — Video ── */
+.msg-row--in  .bubble:has(.bubble-media-video-wrap) ,
+.msg-row--out .bubble:has(.bubble-media-video-wrap) { padding: 4px 4px 6px; }
+
+.bubble-media-video-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-decoration: none;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 4px;
+  cursor: pointer;
+  line-height: 0;
+  background: #000;
+  min-width: 150px;
+  min-height: 150px;
+}
+
+.bubble-video-preview {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: opacity 0.15s ease;
+  pointer-events: none; /* Let clicks pass to the wrap */
+}
+
+.bubble-media-video-wrap:hover .bubble-video-preview { opacity: 0.8; }
+
+.bubble-video-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.bubble-video-play-btn svg {
+  width: 24px;
+  height: 24px;
+  margin-left: 3px; /* visual center for play icon */
+}
+
+/* ── Real Media — Audio / Voice ── */
+.bubble-audio-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 6px;
+  min-width: 200px;
+}
+
+.bubble-audio-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  filter: opacity(0.8);
+}
+
+.bubble-audio {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  outline: none;
+  accent-color: var(--color-accent);
+}
+
+/* ── Real Media — Document ── */
+.bubble-doc {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 2px;
+  min-width: 220px;
+  max-width: 280px;
+}
+
+.bubble-doc__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.bubble-doc__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.bubble-doc__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.bubble-doc__name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.3;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--color-text-primary);
+}
+
+.bubble-doc__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.bubble-doc__action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none !important;
+  color: var(--color-text-primary) !important;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+}
+
+.bubble-doc__action:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.bubble-doc__action--view {
+  background: transparent !important;
+  color: var(--color-accent) !important;
+}
+
+.bubble-doc__action--view:hover {
+  background: var(--color-accent-subtle) !important;
+}
+
+
+/* ── Link in Bubble ── */
+.bubble a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  word-break: break-all;
+}
+
+.bubble--out a { color: rgba(255,255,255,0.85); }
+
+/* ── Emoji-only Bubble ── */
+.bubble.emoji-only {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 2px;
+  font-size: 2.2rem;
+  line-height: 1.3;
+}
+.bubble.emoji-only::after { display: none; }
+
+/* ── Fake Input Bar (Base) ── */
+.chat-input-bar {
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--color-bg-header) 85%, transparent);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 10;
+  position: relative;
+}
+
+.input-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.chat-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-input);
+  border-radius: 20px;
+  padding: 6px 12px;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.chat-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  cursor: not-allowed;
+  font-family: inherit;
+  padding: 4px 0;
+}
+
+.chat-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.chat-input-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-icon);
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .chat-header__back { display: flex; }
+
+  .msg-row { max-width: 86%; }
+
+  .messages-inner { padding: 0 8px; }
+}
+
+@media (max-width: 480px) {
+  .msg-row { max-width: 92%; }
+}
+
+/* ── Custom Audio Player Base ── */
+.custom-audio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 280px;
+  max-width: 100%;
+}
+
+.custom-audio__element {
+  width: 100%;
+  outline: none;
+}
+
+.custom-audio__play-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+  transition: transform 0.1s ease;
+}
+
+.custom-audio__play-btn:active {
+  transform: scale(0.92);
+}
+
+.custom-audio__play-btn .icon-pause { display: none; }
+.custom-audio__play-btn.playing .icon-play { display: none; }
+.custom-audio__play-btn.playing .icon-pause { display: block; }
+
+.custom-audio__progress-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-audio__slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+}
+.custom-audio__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+.custom-audio__slider::-moz-range-thumb {
+  border: none;
+}
+.custom-audio__time {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+  min-width: 35px;
+  text-align: right;
+}
+
+/* ── Stickers ── */
+.bubble--sticker {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.bubble--sticker::after, .bubble--sticker::before {
+  display: none !important;
+}
+
+.bubble--sticker .bubble-media-img-wrap,
+.bubble--sticker .bubble-img {
+  border-radius: 0 !important;
+  max-width: 140px;
+  max-height: 140px;
+  object-fit: contain;
+}
+
+.bubble--sticker .bubble-meta {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 10px;
+  padding: 2px 6px;
+}
+
+.bubble--sticker .bubble-time {
+  color: #ffffff !important;
+  font-size: 0.65rem;
+  margin: 0;
+}
+
+.bubble--sticker .bubble-sender {
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff !important;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
