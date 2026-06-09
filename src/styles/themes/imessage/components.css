@@ -25,30 +25,57 @@
 [data-theme="imessage"] .chat-input-bar .btn-wa-mic { display: none; }
 
 [data-theme="imessage"] .chat-input-bar {
-  padding: 12px 16px;
-  gap: 12px;
+  padding: 10px 16px;
+  background: var(--color-bg-chat); /* Usually a very light gray in iMessage */
+  border-top: none;
 }
 
 [data-theme="imessage"] .chat-input-wrapper {
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 4px 6px 4px 16px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="imessage"][data-mode="dark"] .chat-input-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 [data-theme="imessage"] .chat-input-bar .btn-plus {
-  color: var(--color-icon);
-  background: var(--color-border);
+  color: #8E8E93;
+  background: #E5E5EA;
   border-radius: 50%;
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="imessage"][data-mode="dark"] .chat-input-bar .btn-plus {
+  background: rgba(255, 255, 255, 0.15);
+  color: #EBEBF5;
 }
 
 [data-theme="imessage"] .chat-input-bar .btn-imessage-send {
-  background: var(--color-accent);
+  background: #007AFF;
   color: #fff;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="imessage"] .chat-input-bar .btn-imessage-send svg {
+  transform: translateX(-1px) translateY(1px); /* Slight adjustment to center the send icon optically */
+  width: 17px;
+  height: 17px;
 }
 
 /* ── iMessage Bubbles (Tails at BOTTOM) ── */

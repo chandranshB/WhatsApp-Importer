@@ -422,29 +422,7 @@ code {
 }
 .storage-toast__close:hover { color: #f9fafb; }
 
-/* ── Mobile Overlay ── */
-.mobile-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 150; /* below sidebar(200) but above chat(100) */
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
 
-.mobile-overlay.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-@media (min-width: 769px) {
-  .mobile-overlay {
-    display: none !important;
-  }
-}
 
 /* ── Lightbox ── */
 .lightbox {

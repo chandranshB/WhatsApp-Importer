@@ -5,12 +5,12 @@ import ChatHeader from './ChatHeader';
 import ChatEmptyState from './ChatEmptyState';
 import ChatInputBar from './ChatInputBar';
 
-export default function ChatPanel() {
+export default function ChatPanel({ isMobileOpen }) {
   const { activeChat, activeId, closeChat, deleteChat } = useChat();
 
   if (!activeChat) {
     return (
-      <main id="chat-panel" className="chat-panel">
+      <main id="chat-panel" className={`chat-panel ${isMobileOpen ? 'mobile-open' : ''}`}>
         <ChatEmptyState />
       </main>
     );
@@ -19,7 +19,7 @@ export default function ChatPanel() {
   const { meta, messages } = activeChat;
 
   return (
-    <main id="chat-panel" className="chat-panel">
+    <main id="chat-panel" className={`chat-panel ${isMobileOpen ? 'mobile-open' : ''}`}>
       <div id="chat-view" className="chat-view">
         <ChatHeader 
           meta={meta} 

@@ -5,7 +5,7 @@ import SidebarSearch from './SidebarSearch';
 import ThemePicker from './ThemePicker';
 import ChatList from './ChatList';
 
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar({ isMobileHidden }) {
   const { handleFileSelect } = useChat();
   const [isThemePickerOpen, setThemePickerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,7 +15,7 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   return (
-    <aside id="sidebar" className={`sidebar ${isOpen ? 'mobile-open' : 'collapsed'}`} aria-label="Chat list">
+    <aside id="sidebar" className={`sidebar ${isMobileHidden ? 'mobile-hidden' : ''}`} aria-label="Chat list">
       <SidebarHeader 
         toggleThemePicker={() => setThemePickerOpen(!isThemePickerOpen)} 
         onImport={triggerImport} 
