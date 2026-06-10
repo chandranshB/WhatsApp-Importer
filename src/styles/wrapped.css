@@ -169,6 +169,7 @@
   color: #e9edef;
   font-weight: 400;
   margin-bottom: 4px;
+  word-break: break-word;
 }
 
 .wa-item-subtitle {
@@ -318,13 +319,13 @@
 
 .wrapped-close-btn {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: clamp(16px, 5cqi, 24px);
+  right: clamp(16px, 5cqi, 24px);
   background: transparent;
   color: #000;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: clamp(32px, 10cqi, 40px);
+  height: clamp(32px, 10cqi, 40px);
   cursor: pointer;
   z-index: 100;
   display: flex;
@@ -410,11 +411,11 @@
 
 .wrapped-progress-container {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  top: clamp(8px, 2cqi, 12px);
+  left: clamp(8px, 2cqi, 12px);
+  right: clamp(8px, 2cqi, 12px);
   display: flex;
-  gap: 4px;
+  gap: clamp(2px, 1cqi, 4px);
   z-index: 50;
 }
 
@@ -439,11 +440,13 @@
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 80px 30px 40px;
+  justify-content: flex-start;
+  padding: clamp(60px, 15cqi, 80px) clamp(15px, 6cqi, 30px) clamp(20px, 8cqi, 40px);
   text-align: center;
   flex-direction: column;
   container-type: inline-size;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .slide-content {
@@ -452,12 +455,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: auto 0;
+  flex-shrink: 0;
 }
 
 /* ── Typography & Elements ── */
 
 .slide-pretitle {
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 3.5cqi, 1rem);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -466,7 +471,7 @@
 }
 
 .slide-title-huge {
-  font-size: 5.5rem;
+  font-size: clamp(3rem, 18cqi, 5.5rem);
   font-weight: 900;
   line-height: 0.9;
   letter-spacing: -0.06em;
@@ -475,15 +480,15 @@
 }
 
 .slide-subtitle {
-  font-size: 2rem;
+  font-size: clamp(1.4rem, 7cqi, 2rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   opacity: 0.9;
-  margin-bottom: 40px;
+  margin-bottom: clamp(20px, 8cqi, 40px);
 }
 
 .slide-date-range {
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 3.5cqi, 1rem);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -494,7 +499,7 @@
 }
 
 .slide-title {
-  font-size: 2.8rem;
+  font-size: clamp(1.8rem, 10cqi, 2.8rem);
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: -0.04em;
@@ -505,7 +510,7 @@
 }
 
 .slide-text {
-  font-size: 1.4rem;
+  font-size: clamp(1.1rem, 5cqi, 1.4rem);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.01em;
@@ -518,13 +523,13 @@
 }
 
 .slide-subtext {
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 3.5cqi, 1rem);
   font-weight: 600;
   opacity: 0.6;
 }
 
 .big-number {
-  font-size: clamp(4rem, 20vw, 7.5rem);
+  font-size: clamp(3.5rem, 20cqi, 7.5rem);
   font-weight: 900;
   line-height: 0.85;
   letter-spacing: -0.06em;
@@ -535,7 +540,6 @@
   overflow-wrap: break-word;
 }
 
-/* Icons */
 .large-icon-container {
   display: flex;
   justify-content: flex-start;
@@ -545,15 +549,15 @@
 }
 
 .large-icon {
-  width: 100px;
-  height: 100px;
+  width: clamp(60px, 20cqi, 100px);
+  height: clamp(60px, 20cqi, 100px);
   stroke-width: 2.5;
 }
 
 /* ── Specific Slides ── */
 
 .busiest-date {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 9cqi, 2.5rem);
   font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.04em;
@@ -580,22 +584,22 @@
 }
 
 .split-name {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 5cqi, 1.5rem);
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .split-val {
-  font-size: 3rem;
+  font-size: clamp(2rem, 10cqi, 3rem);
   font-weight: 900;
   letter-spacing: -0.03em;
 }
 
 .donut-chart-container {
-  width: 240px;
-  height: 240px;
+  width: clamp(180px, 60cqi, 240px);
+  height: clamp(180px, 60cqi, 240px);
   position: relative;
-  margin-top: 40px;
+  margin-top: clamp(20px, 8cqi, 40px);
 }
 
 .donut-chart {
@@ -618,32 +622,33 @@
 }
 
 .donut-text-val {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 12cqi, 4rem);
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.05em;
 }
 
 .donut-text-name {
-  font-size: 1.2rem;
+  font-size: clamp(0.9rem, 4cqi, 1.2rem);
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .word-clouds {
   display: flex;
-  flex-direction: column;
-  gap: 30px;
+  flex-direction: row;
+  gap: clamp(10px, 3cqi, 30px);
   width: 100%;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .word-cloud-col {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .word-cloud-header {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 5cqi, 1.5rem);
   font-weight: 900;
   margin-bottom: 15px;
   text-transform: uppercase;
@@ -665,63 +670,76 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 4px;
 }
 
-.word-item.rank-0 { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; }
-.word-item.rank-1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; opacity: 0.9; }
-.word-item.rank-2 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; opacity: 0.8; }
-.word-item.rank-3 { font-size: 1.2rem; font-weight: 700; opacity: 0.7; }
-.word-item.rank-4 { font-size: 1rem; font-weight: 600; opacity: 0.6; }
+.word-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.word-item.rank-0 { font-size: clamp(1.4rem, 6cqi, 2rem); font-weight: 900; letter-spacing: -0.03em; }
+.word-item.rank-1 { font-size: clamp(1.2rem, 5cqi, 1.6rem); font-weight: 800; letter-spacing: -0.02em; opacity: 0.9; }
+.word-item.rank-2 { font-size: clamp(1rem, 4cqi, 1.4rem); font-weight: 800; letter-spacing: -0.01em; opacity: 0.8; }
+.word-item.rank-3 { font-size: clamp(0.9rem, 3.5cqi, 1.2rem); font-weight: 700; opacity: 0.7; }
+.word-item.rank-4 { font-size: clamp(0.8rem, 3cqi, 1rem); font-weight: 600; opacity: 0.6; }
 
 .word-count {
-  font-size: 1rem;
+  font-size: clamp(0.75rem, 3cqi, 0.9rem);
   font-weight: 800;
   background: #000;
   color: #fff;
-  padding: 4px 10px;
+  padding: 2px 8px;
   border-radius: 20px;
+  flex-shrink: 0;
 }
 
 .emoji-display {
   display: flex;
-  flex-direction: column;
-  gap: 30px;
+  flex-direction: row;
+  gap: clamp(10px, 3cqi, 30px);
   width: 100%;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 .emoji-col {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   background: rgba(0,0,0,0.05);
   border: 3px solid #000;
-  padding: 20px;
+  padding: clamp(10px, 4cqi, 20px);
   border-radius: 20px;
+  gap: 10px;
+  text-align: center;
 }
 
 .emoji-col-name {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 5cqi, 1.5rem);
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .big-emoji {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 10cqi, 4rem);
   line-height: 1;
 }
 
 .small-emojis {
-  font-size: 2rem;
+  font-size: clamp(1.2rem, 5cqi, 2rem);
   display: flex;
   gap: 10px;
+  justify-content: center;
 }
 
 .starter-stats {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 5cqi, 1.4rem);
   font-weight: 900;
   text-transform: uppercase;
   width: 100%;
@@ -729,12 +747,12 @@
 
 .starter-bar-chart {
   width: 100%;
-  height: 80px;
+  height: clamp(60px, 20cqi, 80px);
   display: flex;
   border-radius: 40px;
   overflow: hidden;
   font-weight: 900;
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 5cqi, 1.5rem);
   border: 4px solid #000;
   margin-top: 20px;
 }
@@ -761,7 +779,7 @@
 .time-card {
   background: transparent;
   border: 3px solid #000;
-  padding: 25px 20px;
+  padding: clamp(15px, 6cqi, 25px) clamp(15px, 5cqi, 20px);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -769,7 +787,12 @@
 }
 
 .time-icon {
-  font-size: 3rem;
+  font-size: clamp(2.2rem, 10cqi, 3rem);
+}
+
+.time-icon svg {
+  width: clamp(36px, 12cqi, 48px);
+  height: clamp(36px, 12cqi, 48px);
 }
 
 .time-info {
@@ -777,14 +800,14 @@
 }
 
 .time-val {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 8cqi, 2.5rem);
   font-weight: 900;
   letter-spacing: -0.04em;
   margin-bottom: 5px;
 }
 
 .time-label {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 4cqi, 1.2rem);
   font-weight: 800;
   text-transform: uppercase;
   opacity: 0.8;
@@ -811,24 +834,24 @@
 }
 
 .reply-name {
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 6cqi, 1.8rem);
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .reply-val {
-  font-size: 3.5rem;
+  font-size: clamp(2.2rem, 10cqi, 3.5rem);
   font-weight: 900;
   letter-spacing: -0.05em;
 }
 
 .timeline-chart-wrapper {
   width: 100%;
-  height: 250px;
+  height: clamp(180px, 50cqi, 250px);
   border: 4px solid #000;
   border-radius: 20px;
-  padding: 20px;
-  margin-top: 30px;
+  padding: clamp(10px, 4cqi, 20px);
+  margin-top: clamp(20px, 8cqi, 30px);
   background: rgba(0,0,0,0.05);
 }
 

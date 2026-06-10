@@ -15,6 +15,17 @@ export default function WrappedViewer({ chatId, myName, customNames, onClose }) 
   const progressInterval = useRef(null);
   const progressStartRef = useRef(Date.now());
 
+  const handleClose = useCallback(() => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => console.log(err));
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen().catch(err => console.log(err));
+      }
+    }
+    onClose();
+  }, [onClose]);
+
   useEffect(() => {
     // Load and process
     const timer = setTimeout(() => {
@@ -66,11 +77,11 @@ export default function WrappedViewer({ chatId, myName, customNames, onClose }) 
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowRight') goToNext();
       if (e.key === 'ArrowLeft') goToPrev();
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNext, goToPrev, onClose]);
+  }, [goToNext, goToPrev, handleClose]);
 
   const handlePointerDown = (e) => {
     setIsPaused(true);
@@ -100,7 +111,7 @@ export default function WrappedViewer({ chatId, myName, customNames, onClose }) 
     return (
       <div className="wrapped-viewer-container error">
         <p>Could not analyze this chat. Not enough data.</p>
-        <button className="btn btn--ghost mt-4" onClick={onClose}>Close</button>
+        <button className="btn btn--ghost mt-4" onClick={handleClose}>Close</button>
       </div>
     );
   }
@@ -134,7 +145,7 @@ export default function WrappedViewer({ chatId, myName, customNames, onClose }) 
         
         <button 
           className="wrapped-close-btn" 
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onClick={(e) => { e.stopPropagation(); handleClose(); }}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
         >

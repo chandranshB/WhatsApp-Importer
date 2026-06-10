@@ -41,6 +41,15 @@ export default function WrappedSetup({ onStart }) {
 
   const handleStart = () => {
     if (selectedChatId && myName !== null) {
+      // Auto full-screen on mobile devices
+      if (window.innerWidth <= 768) {
+        const docElm = document.documentElement;
+        if (docElm.requestFullscreen) {
+          docElm.requestFullscreen().catch(err => console.log(err));
+        } else if (docElm.webkitRequestFullscreen) {
+          docElm.webkitRequestFullscreen().catch(err => console.log(err));
+        }
+      }
       onStart(selectedChatId, myName, customNames);
     }
   };
